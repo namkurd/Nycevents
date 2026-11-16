@@ -1,0 +1,30 @@
+{
+  "name": "nycevents",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal NYC events calendar pipeline",
+  "scripts": {
+    "collect": "NODE_USE_ENV_PROXY=1 tsx pipeline/cli/collect.ts",
+    "pipeline": "NODE_USE_ENV_PROXY=1 tsx pipeline/build.ts",
+    "stops": "NODE_USE_ENV_PROXY=1 tsx pipeline/transit/build-stops.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/yauzl": "^3.4.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.12.1",
+    "yauzl": "^3.4.0",
+    "zod": "^4.6.7"
+  }
+}

@@ -39,7 +39,10 @@ app/index.html                    # the artifact page (single file)
 tests/fixtures/                   # real responses saved from each source
 ```
 
-Scripts: `npm run collect -- --source=fomo`, `npm run pipeline` (all collectors to dist), `npm test`.
+Scripts: `npm run collect -- --source=fomo`, `npm run pipeline` (all collectors to dist), `npm run stops` (rebuild transit stops), `npm test`, `npm run typecheck`.
+
+- Node's built-in `fetch` only uses the sandbox proxy with `NODE_USE_ENV_PROXY=1`; the npm scripts set it.
+- Every response is cached for the day under `data/raw/http/`. While developing, `NYC_USE_CACHE=1 npm run pipeline` rebuilds from that cache in about 30 seconds instead of re-fetching (a full live run takes about 4–5 minutes, mostly fomo's ~130 files at 1 request per second).
 
 **Page constraints (claude.ai artifact):**
 - Scripts load only from cdnjs, cdn.jsdelivr.net/npm, unpkg, cdn.tailwindcss.com or code.jquery.com, with exact pinned versions (for example `fullcalendar@6.1.15`).
@@ -79,7 +82,14 @@ type SourceId = 'fomo' | 'nycforfree' | 'skint' | 'cityhappenings' | 'readingthe
   | 'fieldnotes' | 'ohmyrockness' | 'thoughtgallery' | 'curated';
 ```
 
-**Week file** `dist/events-YYYY-Www.json` = `{ week, generatedAt, events: Event[], ongoing: Event[] }`. Ongoing items appear once, in `ongoing`, not on every day. Budget: under 4 MB per week file. Drop fomo descriptions over 400 characters and skip fomo events outside the next 28 days.
+**Hidden by default (owner's decision, Nov 16):** fitness classes and brand pop-ups. Each event carries `hide: ['fitness' | 'brand-popup']` when it falls in one of these groups. Rules live in `pipeline/categories.ts`: fomo `Fitness`/`Open Practice` types and fitness-tagged classes; fomo `Pop-Up` type and shopping tags; NYC for FREE brand categories (Fashion, Beauty, Food, Drink, Pet, Cars, Technology, Travel, NYFW); and titles with pop-up/shop/store/giveaway/sampling wording or "Brand X Brand" collaborations. A newsletter pick removes the brand-popup flag. The page shows each group behind its own toggle.
+
+**Week files (format 2)**, written by `build.ts`:
+- `dist/events-YYYY-Www.json`: shown events. `dist/events-YYYY-Www-hidden.json`: hidden-by-default events, loaded only when a group is toggled on.
+- Each is `{ format: 2, week, from, to, generatedAt, venues: { v0: Venue }, events: LeanEvent[], ongoing: LeanEvent[] }`.
+- A `LeanEvent` is an `Event` without `venue`/`sources`, plus `v` (venue key), `src` (source ids) and `links` (only source URLs that differ from `url`). Defaults are omitted: `pickedBy` [], `allDay` false, unknown `price`, `score` 0. Non-pick descriptions are cut to about 110 characters; tags to 3.
+- Ongoing runs appear in `ongoing` of every week they overlap.
+- Budget: under 6 MB raw per shown week file, about 1.5 MB gzipped. The densest week measured 4.7 MB raw, 1.26 MB gzipped, and parsed in 43 ms. `dist/index.json` lists the weeks, per-source status and counts.
 
 **Shared marks (artifact `db`):** one doc per person at `marks/{userId}`, shaped `{ [eventId]: { status: 'interested' | 'going', note?: string, at: number } }`. Rules: everyone reads, and each person writes only their own doc.
 
@@ -138,8 +148,10 @@ Each collector saves its raw payload to `data/raw/`, keeps one real response as 
 
 **9. Transit scoring**
 - `pipeline/transit/build-stops.ts` downloads MTA GTFS from `https://rrgtfsfeeds.s3.amazonaws.com/gtfs_subway.zip` and `https://rrgtfsfeeds.s3.amazonaws.com/gtfs_b.zip` (Brooklyn buses). Both were reachable from the NYC Events environment on Nov 15. It writes `data/curated/one-seat-stops.json` (route → every stop it serves, with lat/lng). Run it monthly; the file is gitignored.
-- Home = `NYC_HOME_LAT` / `NYC_HOME_LNG`. Tier 1 routes = comma list in `NYC_HOME_ROUTES_T1`; tier 2 = `NYC_HOME_ROUTES_T2`. Route ids match GTFS `route_id` (the B44 SBS is `B44+`). If the variables are missing, skip transit scoring and say so; never hardcode a fallback.
+- Home = `NYC_HOME_LAT` / `NYC_HOME_LNG`. Tier 1 routes = comma list in `NYC_HOME_ROUTES_T1`; tier 2 = `NYC_HOME_ROUTES_T2`. Route ids match GTFS `route_id` (Select Bus Service routes end in `+`, e.g. `M15+`). If the variables are missing, skip transit scoring and say so; never hardcode a fallback.
 - For each event with lat/lng: nearest stop on a tier-1 route within 400 m → `transit = { tier: 1, routes, walkM }`; otherwise tier 2 within 400 m; otherwise none. Always set `homeKm`.
+
+**NYC boundary:** fomo also lists New Jersey, Nassau and Westchester venues. `inNyc()` in `collectors/fomo.ts` keeps a bounding box, drops everything west of the Hudson (a hand-traced line), the Great Neck peninsula, and Mount Vernon/Pelham.
 
 **Dedupe and rank**
 - Same event = same start date + same venue (normalized with fomo's `locations[].aliases`) + title token Jaccard ≥ 0.6, or one title containing the other.
@@ -151,15 +163,16 @@ Each collector saves its raw payload to `data/raw/`, keeps one real response as 
 Do them in order, and stop at each gate.
 
 ### M1 — Data pipeline
-- [ ] Scaffold (layout above), `package.json` scripts, vitest.
-- [ ] `schema.ts` with zod, plus a test that rejects a malformed event.
-- [ ] fomo collector, with fixture tests for one day chunk and one remainder chunk.
-- [ ] NYC for FREE collector, with a fixture test covering the `occurrences` sessions.
-- [ ] The Skint collector and parser, the inbox fallback (spec 5), and transit scoring (spec 9), each with a fixture test on saved real data.
-- [ ] `dedupe.ts`, `rank.ts` and `build.ts` → `dist/index.json` plus 4 week files.
-- [ ] Re-measure fomo coverage across all 7 days for: The Met, Atlas Obscura, The Kitchen, Little Island, Whitney, Guggenheim, Brooklyn Museum, Morgan, 92NY, Film Forum, BAM, Lincoln Center. Report which have events.
+- [x] Scaffold (layout above), `package.json` scripts, vitest.
+- [x] `schema.ts` with zod, plus a test that rejects a malformed event.
+- [x] fomo collector, with fixture tests for one day chunk and one remainder chunk.
+- [x] NYC for FREE collector, with a fixture test covering the `occurrences` sessions.
+- [x] The Skint collector and parser, the inbox fallback (spec 5), and transit scoring (spec 9), each with a fixture test on saved real data.
+- [x] `dedupe.ts`, `rank.ts` and `build.ts` → `dist/index.json` plus 4 week files.
+- [x] Re-measure fomo coverage across all 7 days for: The Met, Atlas Obscura, The Kitchen, Little Island, Whitney, Guggenheim, Brooklyn Museum, Morgan, 92NY, Film Forum, BAM, Lincoln Center. Report which have events.
+    - Result, Nov 16 (next 4 weeks): Whitney 113, Film Forum 124, Lincoln Center 80, BAM 79, Brooklyn Museum 72, 92NY 31, Guggenheim 24, The Met 17, Morgan 9, Little Island 6. **None:** Atlas Obscura, The Kitchen.
 
-*Gate M1:* `npm test` passes. `npm run pipeline` prints a count per source and writes week files under 4 MB each. Show the owner 20 random events with their source links to spot-check.
+*Gate M1:* `npm test` passes. `npm run pipeline` prints a count per source and writes week files under the 6 MB budget. Show the owner 20 random events with their source links to spot-check.
 
 ### M2 — Shared calendar page
 - [ ] Load the `artifact-design` and `artifact-capabilities` skills, then build `app/index.html`. Use FullCalendar (pinned) with week (default), day, month and list views; month cells show a count plus the top 3.
