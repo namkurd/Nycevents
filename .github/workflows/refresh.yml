@@ -6,7 +6,10 @@ name: Refresh listings
 
 on:
   schedule:
+    # GitHub's scheduler can skip or delay a run, so there is a second try; it exits early
+    # when today's listings are already on the data branch.
     - cron: '40 10 * * 1,4'   # Mon and Thu, 5:40am New York in winter (6:40am in summer)
+    - cron: '25 11 * * 1,4'   # backup, 45 minutes later
   workflow_dispatch: {}
 
 permissions:
@@ -23,26 +26,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Skip if today's listings already exist (backup schedule only)
+        id: fresh
+        if: github.event_name == 'schedule'
+        run: |
+          if git fetch -q --depth 1 origin data 2>/dev/null && git show FETCH_HEAD:index.json > /tmp/ix.json 2>/dev/null; then
+            built=$(node -e "const d=new Date(require('/tmp/ix.json').generatedAt);console.log(d.toLocaleDateString('en-CA',{timeZone:'America/New_York'}))")
+            today=$(TZ=America/New_York date +%F)
+            if [ "$built" = "$today" ]; then echo "Listings for $today already built; nothing to do."; echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.fresh.outputs.skip != 'true'
         with:
           node-version: '22'
           cache: npm
 
       - name: Install dependencies
+        if: steps.fresh.outputs.skip != 'true'
         run: npm ci
 
       - name: Test
+        if: steps.fresh.outputs.skip != 'true'
         run: npm test
 
       - name: Install a headless browser (this job only)
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
       - name: Collect and build
+        if: steps.fresh.outputs.skip != 'true'
         run: npm run pipeline
 
       - name: Check the output holds nothing about home
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           if grep -l -E '"(homeKm|transit)"' dist/*.json; then
             echo "dist/ contains home-derived fields; refusing to publish" >&2
@@ -51,6 +70,7 @@ jobs:
           node -e "const ix=require('./dist/index.json'); for (const [k,s] of Object.entries(ix.sources)) console.log((s.ok?'ok  ':'FAIL')+' '+k+' '+s.count+(s.error?' '+s.error:''))"
 
       - name: Save week files to the data branch
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           mkdir -p /tmp/data && cp dist/*.json /tmp/data/
           cd /tmp/data
