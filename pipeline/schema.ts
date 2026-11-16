@@ -9,7 +9,7 @@ export type SourceId = z.infer<typeof SourceId>;
 
 /** Sources whose inclusion of an event counts as an editorial pick. */
 export const PICK_SOURCES: SourceId[] = [
-  'nycforfree', 'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery',
+  'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery',
 ];
 
 export const CATEGORIES = [

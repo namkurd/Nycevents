@@ -303,6 +303,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
     rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
+    home: null,
   };
 
   // ---------- data ----------
@@ -368,6 +369,9 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       S.marks = next; S.dbReady = true;
       refreshPeople(); render();
     }, err => { console.warn('marks subscription ended', err); });
+    db.doc('home/config').onSnapshot(snap => {
+      S.home = snap.exists ? snap.data() : null; transitCache.clear(); render();
+    }, err => console.warn('home subscription ended', err));
     db.doc('rhythms/list').onSnapshot(snap => {
       S.rhythmsExists = snap.exists;
       const d = snap.exists ? snap.data() : {};
@@ -421,6 +425,44 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     }, 450);
   }
 
+  // ---------- transit from home (computed here; home lives only in the page's private database) ----------
+  const transitCache = new Map();
+  const metres = (aLat, aLng, bLat, bLng) => {
+    const R = 6371000, rad = d => d * Math.PI / 180;
+    const h = Math.sin(rad(bLat - aLat) / 2) ** 2 + Math.cos(rad(aLat)) * Math.cos(rad(bLat)) * Math.sin(rad(bLng - aLng) / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  };
+  /** { transit?: {tier, routes, walkM}, homeKm } for an event's venue, or null without a home or coordinates. */
+  function geoOf(e) {
+    const v = e.venue; const H = S.home;
+    if (!H || v?.lat == null || v?.lng == null) return null;
+    const key = `${v.lat},${v.lng}`;
+    if (transitCache.has(key)) return transitCache.get(key);
+    const out = { homeKm: Math.round(metres(H.lat, H.lng, v.lat, v.lng) / 100) / 10 };
+    for (const [tier, routes] of [[1, H.tier1 || []], [2, H.tier2 || []]]) {
+      let best = Infinity; const hit = [];
+      for (const r of routes) {
+        let near = Infinity;
+        for (const [sLat, sLng] of (H.stops || {})[r] || []) {
+          if (Math.abs(sLat - v.lat) > 0.006 || Math.abs(sLng - v.lng) > 0.008) continue;
+          near = Math.min(near, metres(v.lat, v.lng, sLat, sLng));
+        }
+        if (near <= 400) { hit.push(r); best = Math.min(best, near); }
+      }
+      if (hit.length) { out.transit = { tier, routes: hit, walkM: Math.round(best) }; break; }
+    }
+    transitCache.set(key, out);
+    return out;
+  }
+  const transitOf = e => e.transit || geoOf(e)?.transit || null;
+  const homeKmOf = e => e.homeKm ?? geoOf(e)?.homeKm ?? null;
+  /** The ranking nudge for being easy to reach: same weights the pipeline used before it moved here. */
+  function homeBonus(e) {
+    if (e.transit || e.homeKm != null) return 0; // already counted in a legacy score
+    const g = geoOf(e); if (!g) return 0;
+    return (g.transit?.tier === 1 ? 1 : g.transit?.tier === 2 ? 0.5 : 0) + (g.homeKm < 3 ? 0.5 : 0);
+  }
+
   // ---------- rhythms (how often we want to do each kind of thing) ----------
   // Status follows the owner's sheet: Greenin (< 75% of the goal), Coolin (75-100%), Overdue (past the goal).
   const RSTATE = { overdue: 'Overdue', coolin: 'Coolin', greenin: 'Greenin' };
@@ -456,7 +498,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     }
     return best;
   }
-  const effScore = e => (e.score || 0) + rBoost(e);
+  const effScore = e => (e.score || 0) + rBoost(e) + homeBonus(e);
   const fmtDays = n => `${n} day${n === 1 ? '' : 's'}`;
   function rLabel(r) {
     const st = rStatus(r);
@@ -491,7 +533,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (S.f.rhythm) { const r = S.rhythms.items[S.f.rhythm]; if (!r || !rMatches(r, e)) return false; }
     const f = S.f;
     if (f.free && !(e.price && e.price.free)) return false;
-    if (f.direct && !e.transit) return false;
+    if (f.direct && !transitOf(e)) return false;
     if (f.both && !bothInterested(e.id)) return false;
     if (f.boro && e.venue.borough !== f.boro) return false;
     if (f.cats.size && !f.cats.has(e.category)) return false;
@@ -528,7 +570,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (e.price && e.price.free) b.push(el('span', { class: 'tag free', text: 'Free' }));
     if (e.rsvp) b.push(el('span', { class: 'tag', text: 'RSVP' }));
     for (const r of eventRhythms(e)) { const st = rStatus(r); if (st.state !== 'greenin' || full) b.push(el('span', { class: 'tag rtag', title: `${r.name}: ${RSTATE[st.state]} (${rLabel(r)})` }, el('i', { style: `background:var(--st-${st.state === 'overdue' ? 'over' : st.state === 'coolin' ? 'cool' : 'green'})` }), r.name)); }
-    if (e.transit) for (const r of e.transit.routes.slice(0, full ? 8 : 3)) b.push(routeBullet(r));
+    const tr = transitOf(e); if (tr) for (const r of tr.routes.slice(0, full ? 8 : 3)) b.push(routeBullet(r));
     return b;
   }
   function stub(e, opts = {}) {
@@ -823,9 +865,9 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       el('div', { class: 'when', text: when }),
       el('div', { class: 'meta' },
         el('div', {}, el('strong', { text: e.venue.name }), e.venue.address ? ` · ${e.venue.address}` : '', e.venue.borough ? ` · ${e.venue.borough}` : ''),
-        e.transit ? el('div', { class: 'badges row' }, 'Direct from home:', e.transit.routes.map(routeBullet), el('span', { text: `stop ${e.transit.walkM} m from the venue` })) : (e.homeKm != null ? el('div', { text: `${e.homeKm} km from home` }) : null),
+        transitOf(e) ? el('div', { class: 'badges row' }, 'Direct from home:', transitOf(e).routes.map(routeBullet), el('span', { text: `stop ${transitOf(e).walkM} m from the venue` })) : (homeKmOf(e) != null ? el('div', { text: `${homeKmOf(e)} km from home` }) : null),
         e.price?.text || e.price?.free ? el('div', { text: e.price.text || 'Free' }) : null,
-        e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', badges({ ...e, transit: null, price: null, rsvp: null })) : null,
+        e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', e.pickedBy.map(p => el('span', { class: 'tag pickedby', text: SOURCES[p] || p }))) : null,
       ),
       e.description ? el('div', { class: 'desc', text: e.description }) : null,
       el('div', { class: 'section-label', text: 'Your plan' }),

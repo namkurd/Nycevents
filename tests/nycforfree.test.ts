@@ -35,10 +35,10 @@ describe('NYC for FREE collector', () => {
     for (const e of ongoing) expect(e.ongoing!.to >= FROM).toBe(true);
   });
 
-  it('marks everything free and as a NYC for FREE pick, hiding brand categories', () => {
+  it('marks everything free, as a background source (not a pick), hiding brand categories', () => {
     for (const e of events) {
       expect(e.price.free).toBe(true);
-      expect(e.pickedBy).toEqual(['nycforfree']);
+      expect(e.pickedBy).toEqual([]);
     }
     for (const e of events.filter(x => ['Fashion', 'Beauty'].includes(x.tags[0]))) expect(e.hide).toContain('brand-popup');
   });

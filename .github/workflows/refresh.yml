@@ -1,0 +1,64 @@
+# Collect all sources on GitHub's free runners and save the week files to the `data` branch.
+# A short scheduled Claude run then copies them onto the City Docket page (see DAILY.md).
+# Nothing here knows the owner's home: NYC_HOME_* is never set, so the output has no
+# transit or distance fields; the page computes those itself from its private database.
+name: Refresh listings
+
+on:
+  schedule:
+    - cron: '40 10 * * 1,4'   # Mon and Thu, 5:40am New York in winter (6:40am in summer)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Install a headless browser (this job only)
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Collect and build
+        run: npm run pipeline
+
+      - name: Check the output holds nothing about home
+        run: |
+          if grep -l -E '"(homeKm|transit)"' dist/*.json; then
+            echo "dist/ contains home-derived fields; refusing to publish" >&2
+            exit 1
+          fi
+          node -e "const ix=require('./dist/index.json'); for (const [k,s] of Object.entries(ix.sources)) console.log((s.ok?'ok  ':'FAIL')+' '+k+' '+s.count+(s.error?' '+s.error:''))"
+
+      - name: Save week files to the data branch
+        run: |
+          mkdir -p /tmp/data && cp dist/*.json /tmp/data/
+          cd /tmp/data
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Listings $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

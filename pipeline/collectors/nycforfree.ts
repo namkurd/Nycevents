@@ -53,7 +53,7 @@ export function parseNycForFree(html: string, from: string, to: string): { event
       price: { free: true, text: 'Free' },
       url,
       sources: [{ id: 'nycforfree' as const, url }],
-      pickedBy: ['nycforfree' as const],
+      pickedBy: [], // a background source, not a curator (owner's decision, Nov 16)
       tags: [a('category'), a('frequency')].filter(Boolean),
       ...(hide.length ? { hide } : {}),
     };

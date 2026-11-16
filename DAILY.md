@@ -1,21 +1,27 @@
-# Daily refresh runbook
+# Refresh runbook
 
-What the daily scheduled session does, in order. It runs in the **NYC Events** cloud environment.
+Listings refresh twice a week, Mondays and Thursdays, in two steps.
 
-1. **Get the repo.** If `namkurd/Nycevents` is not already in the session, attach it with `add_repo`, clone it, then check out the working branch.
-2. **Install:** `npm ci`.
-3. **Collect:** `npm run pipeline`. This takes about 5 minutes: fomo is ~130 files at 1 request per second, and Oh My Rockness loads 14 pages in a headless browser. Note the per-source counts it prints.
-4. **Read the inbox.** For each file in `data/inbox/`, read the text and write the events it states to the cache path named in its header (`data/cache/extract/<hash>.json`), in the format documented at the top of `pipeline/inbox.ts`.
-   - Fill in only fields the text states. If a block is an ad, a feature or holds no dated event, write `"events": []`.
-   - Delete the inbox file after writing its cache file.
-5. **Rebuild:** `NYC_USE_CACHE=1 npm run pipeline`. This reuses today's downloads and folds the extracted events in.
-6. **Commit** only `data/cache/` (never `dist/`, which holds distances from home): `git add data/cache && git commit -m "Daily refresh <date>"`, then push the working branch.
-7. **Publish** the data files to the existing page with the Artifact tool:
-   - `url`: https://claude.ai/artifact/7Gux5vJioAx6CaepNhEP9z
-   - `file_path`: `app/index.html`
-   - `files`: `index.json` plus every `file` and `hiddenFile` listed in `dist/index.json`, each mapped to `dist/<name>`.
-   - Map each week file that has dropped out of the window to `null`.
+## 1. GitHub Actions collects (free, no Claude)
+
+`.github/workflows/refresh.yml` runs at 10:40 UTC, which is 5:40am New York in winter and 6:40am in summer. You can also start it by hand from the Actions tab ("Run workflow").
+
+- It runs the tests, installs a headless browser for this job only, then runs `npm run pipeline` with no `NYC_HOME_*` set, so the output has no transit or distance fields.
+- It refuses to publish if `homeKm` or `transit` shows up in `dist/`.
+- It force-pushes the week files as a single commit to the `data` branch.
+- The newsletter inbox (the ~5% of entries the rules can't read) is skipped in this mode.
+
+## 2. A short Claude run publishes (scheduled task "City Docket refresh")
+
+1. Attach `namkurd/Nycevents` with `add_repo`, then clone only the `data` branch: `git clone --depth 1 --branch data <clone url> data`.
+2. Read `data/index.json`.
+   - If `generatedAt` is more than 20 hours old, the Actions run has not finished or failed. Report that and stop without publishing.
+3. Publish with the Artifact tool to `https://claude.ai/artifact/7Gux5vJioAx6CaepNhEP9z`:
+   - `file_path`: `app/index.html`. Fetch it from the working branch with `git show origin/claude/loving-lamport-sz2e25:app/index.html > index.html`, or clone that branch too.
+   - `files`: `index.json` plus every `file` and `hiddenFile` listed in `index.json`, each mapped to its path under `data/`.
    - Leave out `capabilities` so the stored ones are kept.
-8. **Report** one line: counts per source, how many inbox files were extracted, and any source that failed. A failed source is reported as failed, never filled in.
+4. Report one line: `generatedAt`, the count per source, and any failed source from `index.json`.
 
-Never: commit home coordinates or `dist/`, defeat a bot check, or invent events.
+## Where home lives
+
+Home coordinates, home routes and their stops live only in the page's private database (`home/config`, writable by the owner only). The page computes transit badges, the "Direct from home" filter and the proximity nudge itself. To change home, update that document (ask Claude to). Never put it in the repo.
