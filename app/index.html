@@ -23,12 +23,16 @@
   --font-ui: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --r: 10px;
+  --st-over: #8a5a00; --st-over-bg: #fff2c7;
+  --st-cool: #1d4f91; --st-cool-bg: #dbe8fb;
+  --st-green: #1c6b41; --st-green-bg: #d5f0e1;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0e1114; --surface: #161a1f; --sunk: #1d2228; --ink: #eceff2; --muted: #9aa3ad; --line: #2a3138;
     --accent: #7fa3ff; --accent-ink: #0b1430; --marker: #e7bd1f; --marker-ink: #1d1700; --good: #4cc38a; --warn: #e3a64a;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    --st-over: #f2c35b; --st-over-bg: #3a2d0c; --st-cool: #9cc2ff; --st-cool-bg: #172a46; --st-green: #7fd9a8; --st-green-bg: #13311f;
     color-scheme: dark;
   }
 }
@@ -36,9 +40,11 @@
   --bg: #0e1114; --surface: #161a1f; --sunk: #1d2228; --ink: #eceff2; --muted: #9aa3ad; --line: #2a3138;
   --accent: #7fa3ff; --accent-ink: #0b1430; --marker: #e7bd1f; --marker-ink: #1d1700; --good: #4cc38a; --warn: #e3a64a;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --st-over: #f2c35b; --st-over-bg: #3a2d0c; --st-cool: #9cc2ff; --st-cool-bg: #172a46; --st-green: #7fd9a8; --st-green-bg: #13311f;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { background: var(--bg); color: var(--ink); }
 body { font-family: var(--font-ui); font-size: 14px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -55,7 +61,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .brand { font-weight: 800; font-stretch: 112%; font-size: 20px; letter-spacing: -.01em; margin-right: 6px; }
-.brand span { background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%); padding: 0 2px; color: var(--ink); }
+.brand span { color: var(--ink); }
+.brand span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--accent); margin-right: 7px; vertical-align: 1px; }
 .range { font-weight: 650; font-size: 15px; min-width: 0; }
 .spacer { flex: 1 1 auto; }
 .seg { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 3px; gap: 2px; }
@@ -102,7 +109,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .ev .ttl { font-weight: 650; font-size: 13.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .ev .ven { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev .badges { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 2px; }
-.ev.pick .ttl span.hl { background: linear-gradient(transparent 55%, var(--marker) 55%, var(--marker) 95%, transparent 95%); color: var(--ink); }
+.ev.pick { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
 .ev .cat { position: absolute; left: -1px; top: 10px; width: 3px; height: 16px; border-radius: 0 3px 3px 0; }
 .ev .marks { position: absolute; right: 6px; top: 6px; display: flex; gap: 2px; }
 .ev .marks .avatar { width: 18px; height: 18px; font-size: 9px; border-width: 1.5px; border-color: var(--surface); }
@@ -110,7 +117,10 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .compact .ev .ttl { -webkit-line-clamp: 2; }
 
 .tag { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; padding: 1px 6px; border-radius: 999px; background: var(--sunk); color: var(--muted); text-transform: uppercase; }
-.tag.pickedby { background: var(--marker); color: var(--marker-ink); }
+.tag.pickedby { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); text-transform: none; letter-spacing: 0; font-size: 11px; }
+.tag.pickedby::before { content: "Pick · "; font-weight: 600; opacity: .8; }
+.tag.rtag { text-transform: none; letter-spacing: 0; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+.tag.rtag i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .tag.free { color: var(--good); background: transparent; border: 1px solid currentColor; }
 .route { display: inline-grid; place-items: center; min-width: 17px; height: 17px; border-radius: 50%; font-size: 10px; font-weight: 800; color: #fff; padding: 0 3px; font-family: var(--font-ui); }
 .route.bus { border-radius: 4px; background: #0b5fae; font-size: 9.5px; padding: 0 4px; }
@@ -133,6 +143,28 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .cell .n b { color: var(--ink); font-weight: 600; }
 .cell .mini { font-size: 11.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cell .mini.pick { font-weight: 650; }
+
+/* Rhythms */
+.due { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.due .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin-right: 4px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; border: 1px solid transparent; }
+.pill.overdue { background: var(--st-over-bg); color: var(--st-over); }
+.pill.coolin { background: var(--st-cool-bg); color: var(--st-cool); }
+.pill.greenin { background: var(--st-green-bg); color: var(--st-green); }
+button.pill { cursor: pointer; }
+button.pill[aria-pressed="true"] { border-color: currentColor; }
+.rh-list { display: grid; gap: 10px; }
+.rh { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; }
+.rh-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.rh-name { font-weight: 750; font-size: 16px; }
+.rh-meta { color: var(--muted); font-size: 12.5px; }
+.meter { height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 999px; }
+.rh-matches { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.rh-form { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-items: end; }
+.rh-form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.rh-form input, .rh-form select { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 8px; font-size: 13px; color: var(--ink); min-width: 0; }
+.rh-form .wide { grid-column: 1 / -1; }
 
 /* Drawer */
 .scrim { position: fixed; inset: 0; background: rgba(10, 12, 14, .38); z-index: 40; }
@@ -180,7 +212,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
   </div>
   <div class="row">
     <div class="seg" role="group" aria-label="View" id="viewSeg">
-      <button data-view="week">Week</button><button data-view="day">Day</button><button data-view="month">Month</button><button data-view="list">List</button><button data-view="ours">Ours</button>
+      <button data-view="week">Week</button><button data-view="day">Day</button><button data-view="month">Month</button><button data-view="list">List</button><button data-view="ours">Ours</button><button data-view="rhythms">Rhythms</button>
     </div>
     <div class="seg" role="group" aria-label="What to show" id="modeSeg">
       <button data-mode="picks" title="Events chosen by your newsletters">Picks</button><button data-mode="all" title="Everything listed">Everything</button>
@@ -266,10 +298,11 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     view: store.get('view', window.matchMedia('(max-width: 900px)').matches ? 'list' : 'week'),
     mode: store.get('mode', 'picks'),
     anchor: today(),
-    f: { free: false, direct: false, both: false, tod: 'any', boro: '', q: '', cats: new Set(store.get('cats', [])) },
+    f: { free: false, direct: false, both: false, tod: 'any', boro: '', q: '', rhythm: '', cats: new Set(store.get('cats', [])) },
     showHidden: store.get('showHidden', { fitness: false, 'brand-popup': false, 'chain-cinema': false }),
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
+    rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
   };
 
   // ---------- data ----------
@@ -335,6 +368,12 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
       S.marks = next; S.dbReady = true;
       refreshPeople(); render();
     }, err => { console.warn('marks subscription ended', err); });
+    db.doc('rhythms/list').onSnapshot(snap => {
+      S.rhythmsExists = snap.exists;
+      const d = snap.exists ? snap.data() : {};
+      if (!rPending) S.rhythms = { items: { ...(d.items || {}) }, log: { ...(d.log || {}) } };
+      render();
+    }, err => console.warn('rhythms subscription ended', err));
     refreshPeople();
   }
   async function refreshPeople() {
@@ -382,11 +421,74 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     }, 450);
   }
 
+  // ---------- rhythms (how often we want to do each kind of thing) ----------
+  // Status follows the owner's sheet: Greenin (< 75% of the goal), Coolin (75-100%), Overdue (past the goal).
+  const RSTATE = { overdue: 'Overdue', coolin: 'Coolin', greenin: 'Greenin' };
+  const daysBetween = (a, b) => Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 864e5);
+  const rItems = () => Object.entries(S.rhythms.items || {}).filter(([, r]) => r && !r.archived).map(([id, r]) => ({ id, ...r }));
+  function rStatus(r, onDate = today()) {
+    if (!r.last) return { state: 'overdue', ratio: 9, since: null, dueIn: -999 };
+    const since = Math.max(0, daysBetween(r.last, onDate));
+    const ratio = since / Math.max(1, r.goalDays);
+    const state = ratio > 1 ? 'overdue' : ratio >= 0.75 ? 'coolin' : 'greenin';
+    return { state, ratio, since, dueIn: r.goalDays - since };
+  }
+  const rOrder = (a, b) => rStatus(b).ratio - rStatus(a).ratio || a.name.localeCompare(b.name);
+  function rMatches(r, e) {
+    const cats = r.cats || []; const words = (r.words || []).map(w => w.toLowerCase().trim()).filter(Boolean);
+    if (!cats.length && !words.length) return false;
+    const catOk = !cats.length || cats.includes(e.category);
+    if (!catOk) return false;
+    if (!words.length) return true;
+    const hay = `${e.title} ${e.venue?.name || ''} ${(e.tags || []).join(' ')} ${e.description || ''}`.toLowerCase();
+    return words.some(w => hay.includes(w));
+  }
+  const eventRhythms = e => rItems().filter(r => rMatches(r, e));
+  /** Score nudge from rhythms, judged on the event's own date: demote right after doing it, lift as it comes due. */
+  function rBoost(e) {
+    const rs = eventRhythms(e); if (!rs.length) return 0;
+    const day = e.ongoing ? today() : dayOf(e);
+    let best = -Infinity;
+    for (const r of rs) {
+      const { state, ratio } = rStatus(r, day < today() ? today() : day);
+      const b = state === 'overdue' ? 2 + Math.min(2, (ratio - 1) * 2) : state === 'coolin' ? 1 : ratio < 0.5 ? -2 : -1;
+      best = Math.max(best, b);
+    }
+    return best;
+  }
+  const effScore = e => (e.score || 0) + rBoost(e);
+  const fmtDays = n => `${n} day${n === 1 ? '' : 's'}`;
+  function rLabel(r) {
+    const st = rStatus(r);
+    if (st.since == null) return 'Never logged';
+    if (st.state === 'overdue') return `${fmtDays(-st.dueIn)} overdue`;
+    return st.dueIn === 0 ? 'Due today' : `Due in ${fmtDays(st.dueIn)}`;
+  }
+  let rPending = 0;
+  async function rWrite(patch) {
+    if (!db || !S.canWrite) { toast('Rhythms are view-only for you on this page.'); return; }
+    // Optimistic local merge, then one write at a time.
+    for (const [k, v] of Object.entries(patch.items || {})) S.rhythms.items[k] = { ...(S.rhythms.items[k] || {}), ...v };
+    for (const [k, v] of Object.entries(patch.log || {})) S.rhythms.log[k] = v;
+    rPending++; render(); if (openId) { const e = findEvent(openId); if (e) openDrawer(e); }
+    writeChain = writeChain.then(() => (S.rhythmsExists ? db.doc('rhythms/list').update(patch) : db.doc('rhythms/list').set({ items: S.rhythms.items, log: S.rhythms.log })))
+      .then(() => { S.rhythmsExists = true; })
+      .catch(err => { console.warn('rhythm save failed', err); toast(err?.code === 'invalid_argument' ? 'This page is view-only for you.' : 'Could not save that change. Try again.'); })
+      .finally(() => { rPending--; });
+  }
+  function logDone(r, date, ev) {
+    const last = r.last && r.last > date ? r.last : date;
+    const key = `${date}_${r.id}_${Date.now().toString(36)}`;
+    rWrite({ items: { [r.id]: { last } }, log: { [key]: { rid: r.id, date, title: ev ? ev.title : r.name, eventId: ev ? ev.id : null, by: S.me || null } } });
+    toast(`Logged ${r.name} on ${shortDate(date)}.`);
+  }
+
   // ---------- filtering ----------
   function passes(e, opts = {}) {
     const marked = isMarked(e.id);
     if (e.hide && e.hide.length && !e.hide.some(h => S.showHidden[h]) && !marked) return false;
-    if (!opts.ignoreMode && S.mode === 'picks' && !e.pickedBy.length && !marked) return false;
+    if (!opts.ignoreMode && !S.f.rhythm && S.mode === 'picks' && !e.pickedBy.length && !marked) return false;
+    if (S.f.rhythm) { const r = S.rhythms.items[S.f.rhythm]; if (!r || !rMatches(r, e)) return false; }
     const f = S.f;
     if (f.free && !(e.price && e.price.free)) return false;
     if (f.direct && !e.transit) return false;
@@ -405,8 +507,8 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     }
     return true;
   }
-  const byTime = (a, b) => (hhmm(a) || '00:00').localeCompare(hhmm(b) || '00:00') || (b.score || 0) - (a.score || 0);
-  const byScore = (a, b) => (isMarked(b.id) - isMarked(a.id)) || (b.score || 0) - (a.score || 0) || byTime(a, b);
+  const byTime = (a, b) => (hhmm(a) || '00:00').localeCompare(hhmm(b) || '00:00') || effScore(b) - effScore(a);
+  const byScore = (a, b) => (isMarked(b.id) - isMarked(a.id)) || effScore(b) - effScore(a) || byTime(a, b);
   function capList(list, cap) {
     if (list.length <= cap) return { shown: list.slice().sort(byTime), extra: 0 };
     return { shown: list.slice().sort(byScore).slice(0, cap).sort(byTime), extra: list.length - cap };
@@ -425,17 +527,17 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     for (const p of e.pickedBy) b.push(el('span', { class: 'tag pickedby', title: `Picked by ${SOURCES[p] || p}`, text: SHORT[p] || p }));
     if (e.price && e.price.free) b.push(el('span', { class: 'tag free', text: 'Free' }));
     if (e.rsvp) b.push(el('span', { class: 'tag', text: 'RSVP' }));
+    for (const r of eventRhythms(e)) { const st = rStatus(r); if (st.state !== 'greenin' || full) b.push(el('span', { class: 'tag rtag', title: `${r.name}: ${RSTATE[st.state]} (${rLabel(r)})` }, el('i', { style: `background:var(--st-${st.state === 'overdue' ? 'over' : st.state === 'coolin' ? 'cool' : 'green'})` }), r.name)); }
     if (e.transit) for (const r of e.transit.routes.slice(0, full ? 8 : 3)) b.push(routeBullet(r));
     return b;
   }
   function stub(e, opts = {}) {
     const markers = markersOf(e.id);
     const cat = CATS[e.category] || CATS.other;
-    const title = e.pickedBy.length ? el('span', { class: 'hl', text: e.title }) : e.title;
     const node = el('button', { class: `ev${e.pickedBy.length ? ' pick' : ''}${markers.length ? ' marked' : ''}`, onclick: () => openDrawer(e), 'aria-label': `${e.title}, ${opts.showDate ? dLabel(dayOf(e)) + ' ' : ''}${clock(hhmm(e))}, ${e.venue.name}` },
       el('span', { class: 'cat', style: `background:${cat[1]}`, 'aria-hidden': 'true' }),
       el('span', { class: 't', text: opts.ongoing ? 'Thru ' + shortDate(e.ongoing.to) : clock(hhmm(e)) }),
-      el('span', { class: 'ttl' }, title),
+      el('span', { class: 'ttl', text: e.title }),
       el('span', { class: 'ven', text: e.venue.name + (e.venue.borough ? ' · ' + e.venue.borough : '') }),
       el('span', { class: 'badges' }, badges(e)),
     );
@@ -454,6 +556,19 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     return sec;
   }
   function emptyNote(msg) { return el('div', { class: 'notice', text: msg }); }
+  function dueBar(events) {
+    const due = rItems().filter(r => rStatus(r).state !== 'greenin').sort(rOrder);
+    const active = S.f.rhythm ? S.rhythms.items[S.f.rhythm] : null;
+    if (!due.length && !active) return null;
+    const bar = el('div', { class: 'due' }, el('span', { class: 'lbl', text: 'Due for' }));
+    for (const r of due) {
+      const st = rStatus(r);
+      const n = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true }) ).length;
+      bar.append(el('button', { class: `pill ${st.state}`, 'aria-pressed': String(S.f.rhythm === r.id), title: `${rLabel(r)}. Show matching events.`, onclick: () => { S.f.rhythm = S.f.rhythm === r.id ? '' : r.id; render(); } }, `${r.name} · ${n}`));
+    }
+    if (active) bar.append(el('button', { class: 'more-btn', onclick: () => { S.f.rhythm = ''; render(); }, text: `Clear "${active.name}"` }));
+    return bar;
+  }
   function inWindow(d) { const w = S.index?.window; return !w || (d >= w.from && d <= w.to); }
 
   // ---------- views ----------
@@ -462,6 +577,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     const { events, ongoing } = eventsIn(from, to);
     const narrow = window.matchMedia('(max-width: 900px)').matches;
     const wrap = el('div', { class: 'agenda' });
+    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     const t = today();
     if (narrow) { wrap.append(agendaDays(from, to, events, 'list')); return wrap; }
@@ -503,6 +619,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     const to = addDays(from, 6);
     const { events, ongoing } = eventsIn(from, to);
     const wrap = el('div', { class: 'agenda' });
+    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     wrap.append(agendaDays(from, to, events, 'list'));
     return wrap;
@@ -511,6 +628,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     const { events, ongoing } = eventsIn(d, d);
     const list = events.filter(e => passes(e));
     const wrap = el('div', { class: 'agenda' });
+    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     if (!inWindow(d)) { wrap.append(emptyNote(`Listings cover ${shortDate(S.index.window.from)} to ${shortDate(S.index.window.to)}.`)); return wrap; }
     const { shown, extra } = capList(list, CAP.day[S.mode]);
@@ -573,6 +691,75 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
       for (const w of x.who) if (w.n) wrap.append(el('div', { class: 'hint', style: 'padding-left:56px', text: `${person(w.uid).name}: ${w.n}` }));
     }
     return wrap;
+  }
+  function viewRhythms() {
+    const wrap = el('div', { class: 'agenda' });
+    const items = rItems().sort(rOrder);
+    const head = el('div', { class: 'row' },
+      el('div', { class: 'range', text: `${items.filter(r => rStatus(r).state === 'overdue').length} overdue · ${items.filter(r => rStatus(r).state === 'coolin').length} coming due` }),
+      el('div', { class: 'spacer' }),
+      S.canWrite ? el('button', { class: 'btn primary', onclick: () => { S.editing = 'new'; render(); }, text: 'Add a rhythm' }) : null);
+    wrap.append(head, el('div', { class: 'hint', text: 'How often you want to do each kind of thing. Logging one pushes similar events down the calendar, then they climb back as the next date comes due.' }));
+    if (!db) wrap.append(emptyNote('Rhythms are saved on claude.ai; open the published page to use them.'));
+    if (S.editing === 'new') wrap.append(rForm(null));
+    const { events } = eventsIn(today(), addDays(today(), 20));
+    const list = el('div', { class: 'rh-list' });
+    for (const r of items) {
+      const st = rStatus(r);
+      const pct = Math.min(100, Math.round((st.since ?? r.goalDays * 1.2) / Math.max(1, r.goalDays) * 100));
+      const color = `var(--st-${st.state === 'overdue' ? 'over' : st.state === 'coolin' ? 'cool' : 'green'})`;
+      const card = el('div', { class: 'rh' },
+        el('div', { class: 'rh-top' },
+          el('span', { class: `pill ${st.state}`, text: RSTATE[st.state] }),
+          el('span', { class: 'rh-name', text: r.name }),
+          el('span', { class: 'tag', text: r.group || 'date' }),
+          el('span', { class: 'rh-meta', text: `Every ${fmtDays(r.goalDays)} · ${r.last ? `last ${shortDate(r.last)} (${fmtDays(st.since)} ago)` : 'not logged yet'} · ${rLabel(r)}` }),
+          el('div', { class: 'spacer' }),
+          S.canWrite ? el('button', { class: 'btn', onclick: () => logDone(r, today(), null), text: 'We did this today' }) : null,
+          S.canWrite ? el('button', { class: 'more-btn', onclick: () => { S.editing = S.editing === r.id ? null : r.id; render(); }, text: S.editing === r.id ? 'Close' : 'Edit' }) : null),
+        el('div', { class: 'meter', title: `${pct}% of the way to the goal` }, el('i', { style: `width:${pct}%;background:${color}` })));
+      if (S.editing === r.id) card.append(rForm(r));
+      if (st.state !== 'greenin') {
+        const m = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true })).sort(byScore).slice(0, 4);
+        if (m.length) card.append(el('div', { class: 'section-label', text: 'Coming up that fits' }), el('div', { class: 'rh-matches' }, m.map(e => stub(e, { showDate: true }))));
+        else if (r.cats?.length || r.words?.length) card.append(el('div', { class: 'hint', text: 'Nothing in the next three weeks matches yet.' }));
+      }
+      list.append(card);
+    }
+    if (!items.length && db) list.append(emptyNote('No rhythms yet. Add one, like "Museum, every 45 days".'));
+    wrap.append(list);
+    const recent = Object.values(S.rhythms.log || {}).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+    if (recent.length) wrap.append(el('div', { class: 'section-label', text: 'Recently logged' }), ...recent.map(l => el('div', { class: 'hint', text: `${shortDate(l.date)} · ${S.rhythms.items[l.rid]?.name || 'Removed'} · ${l.title}${l.by ? ' · ' + person(l.by).name : ''}` })));
+    return wrap;
+  }
+  function rForm(r) {
+    const id = r ? r.id : null;
+    const f = el('form', { class: 'rh-form' });
+    const name = el('input', { id: 'rf-name', value: r?.name || '', required: true, placeholder: 'e.g. Museum' });
+    const group = el('select', { id: 'rf-group' }, ['date', 'chill'].map(g => el('option', { value: g, selected: (r?.group || 'date') === g }, g)));
+    const goal = el('input', { id: 'rf-goal', type: 'number', min: '1', max: '730', value: String(r?.goalDays || 30), required: true });
+    const last = el('input', { id: 'rf-last', type: 'date', value: r?.last || '' });
+    const words = el('input', { id: 'rf-words', value: (r?.words || []).join(', '), placeholder: 'museum, gallery, opening' });
+    const catBox = el('div', { class: 'row wide' }, Object.entries(CATS).map(([k, [label, color]]) => {
+      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String((r?.cats || []).includes(k)), onclick: () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')) }, el('span', { class: 'dot', style: `background:${color}` }), label);
+      b.dataset.cat = k; return b;
+    }));
+    f.append(
+      el('label', {}, 'Name', name), el('label', {}, 'Kind', group), el('label', {}, 'Every (days)', goal), el('label', {}, 'Last done', last),
+      el('label', { class: 'wide' }, 'Words that mark a matching event (any of)', words),
+      el('div', { class: 'wide section-label', text: 'Event categories that count (leave empty to match on words only)' }), catBox,
+      el('div', { class: 'row wide' }, el('button', { class: 'btn primary', type: 'submit', text: id ? 'Save' : 'Add' }), el('button', { class: 'btn', type: 'button', onclick: () => { S.editing = null; render(); }, text: 'Cancel' }),
+        id ? el('div', { class: 'spacer' }) : null,
+        id ? el('button', { class: 'more-btn', type: 'button', onclick: () => { rWrite({ items: { [id]: { archived: true } } }); S.editing = null; toast(`Removed ${r.name}.`); }, text: 'Remove this rhythm' }) : null));
+    f.addEventListener('submit', ev => {
+      ev.preventDefault();
+      const nm = name.value.trim(); if (!nm) return;
+      const rid = id || nm.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-' + Date.now().toString(36).slice(-4);
+      const cats = [...catBox.querySelectorAll('[data-cat]')].filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.cat);
+      rWrite({ items: { [rid]: { name: nm, group: group.value, goalDays: Math.max(1, Math.min(730, Number(goal.value) || 30)), last: last.value || null, words: words.value.split(',').map(w => w.trim()).filter(Boolean), cats, archived: false } } });
+      S.editing = null; toast(id ? 'Saved.' : `Added ${nm}.`);
+    });
+    return f;
   }
   function findEvent(id) {
     for (const map of [S.weeks, S.hiddenWeeks]) for (const wk of map.values()) { const e = wk.events.find(x => x.id === id) || wk.ongoing.find(x => x.id === id); if (e) return e; }
@@ -645,6 +832,11 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
       el('div', { class: 'status' }, statusBtn('interested', 'Interested'), statusBtn('going', 'Going')),
       note,
       others.map(uid => { const m = markOf(uid, e.id); const p = person(uid); return el('div', { class: 'partner' }, el('div', { class: 'row' }, avatar(uid), el('strong', { text: `${p.name}: ${m.s === 'going' ? 'Going' : m.s === 'interested' ? 'Interested' : 'Left a note'}` })), m.n ? el('div', { text: m.n }) : null); }),
+      eventRhythms(e).length ? el('div', { class: 'section-label', text: 'Counts toward' }) : null,
+      eventRhythms(e).length ? el('div', { class: 'rh-list' }, eventRhythms(e).map(r => { const st = rStatus(r); return el('div', { class: 'row' },
+        el('span', { class: `pill ${st.state}`, text: `${r.name} · ${RSTATE[st.state]}` }), el('span', { class: 'hint', text: rLabel(r) }), el('div', { class: 'spacer' }),
+        S.canWrite && !e.ongoing && dayOf(e) <= today() ? el('button', { class: 'btn', onclick: () => logDone(r, dayOf(e), e), text: 'We did this' }) : null,
+        S.canWrite && (e.ongoing || dayOf(e) > today()) ? el('span', { class: 'hint', text: 'Log it here after you go' }) : null); })) : null,
       el('div', { class: 'section-label', text: 'Add to calendar' }),
       el('div', { class: 'actions' },
         el('a', { class: 'btn primary', href: googleUrl(e), target: '_blank', rel: 'noopener', text: 'Google Calendar' }),
@@ -666,6 +858,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
   }
   function rangeLabel() {
     if (S.view === 'ours') return 'Your plans';
+    if (S.view === 'rhythms') return 'Your rhythms';
     if (S.view === 'day') return dLabel(S.anchor) + (S.anchor === today() ? ' · Today' : '');
     if (S.view === 'month') return `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+S.anchor.slice(5, 7) - 1]} ${S.anchor.slice(0, 4)}`;
     const m = mondayOf(S.anchor); const e = addDays(m, 6);
@@ -688,9 +881,10 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     const nHidden = Object.values(S.showHidden).filter(Boolean).length;
     $('#hiddenSummary').textContent = nHidden ? `Hidden groups · ${nHidden} shown` : 'Hidden groups';
     $('#range').textContent = rangeLabel();
-    const nav = S.view !== 'ours';
+    const nav = S.view !== 'ours' && S.view !== 'rhythms';
     $('#prev').hidden = !nav; $('#next').hidden = !nav; $('#todayBtn').hidden = !nav;
-    $('#modeSeg').hidden = S.view === 'ours';
+    $('#modeSeg').hidden = !nav;
+    $('#filters').hidden = S.view === 'rhythms';
   }
   function footer() {
     const ix = S.index; if (!ix) return null;
@@ -706,7 +900,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     const token = ++renderToken;
     const main = $('#main');
     if (!S.index) return;
-    if (S.view !== 'ours') {
+    if (S.view !== 'ours' && S.view !== 'rhythms') {
       const [from, to] = rangeFor();
       const pending = weeksFor(from, to).some(w => !S.weeks.has(w.week) || (Object.values(S.showHidden).some(Boolean) && !S.hiddenWeeks.has(w.week)));
       if (pending) {
@@ -715,8 +909,8 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
         if (token !== renderToken) return;
       }
     } else {
-      const [from] = [today()];
-      await ensureWeeks(from, addDays(from, 34));
+      const from = today();
+      await ensureWeeks(from, addDays(from, S.view === 'rhythms' ? 20 : 34));
       if (token !== renderToken) return;
     }
     let body;
@@ -724,6 +918,7 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
     else if (S.view === 'list') body = viewList(mondayOf(S.anchor));
     else if (S.view === 'day') body = viewDay(S.anchor);
     else if (S.view === 'month') body = viewMonth(S.anchor);
+    else if (S.view === 'rhythms') body = viewRhythms();
     else body = viewOurs();
     main.replaceChildren(body, footer() || '');
   }

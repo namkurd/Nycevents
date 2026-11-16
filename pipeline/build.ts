@@ -8,6 +8,9 @@ import { join } from 'node:path';
 import { aliasesOf, collectFomo, type FomoLocation } from './collectors/fomo.ts';
 import { collectNycForFree } from './collectors/nycforfree.ts';
 import { collectSkint } from './collectors/skint.ts';
+import { collectSubstack } from './collectors/substack.ts';
+import { collectOhMyRockness } from './collectors/ohmyrockness.ts';
+import { collectThoughtGallery } from './collectors/thoughtgallery.ts';
 import { dedupe, type VenueIndex } from './dedupe.ts';
 import { loadExtracted, writeInbox } from './inbox.ts';
 import { eventId, normKey } from './lib/text.ts';
@@ -85,6 +88,11 @@ export async function run(): Promise<void> {
     ['fomo', async () => { const r = await collectFomo(ROOT, DAYS); locations = r.locations; return r; }],
     ['nycforfree', () => collectNycForFree(ROOT, DAYS)],
     ['skint', () => collectSkint(ROOT)],
+    ['fieldnotes', () => collectSubstack(ROOT, 'fieldnotes')],
+    ['cityhappenings', () => collectSubstack(ROOT, 'cityhappenings')],
+    ['readingthecity', () => collectSubstack(ROOT, 'readingthecity')],
+    ['ohmyrockness', () => collectOhMyRockness(ROOT, DAYS)],
+    ['thoughtgallery', () => collectThoughtGallery(ROOT, DAYS)],
   ];
   for (const [id, fn] of collectors) {
     try {
