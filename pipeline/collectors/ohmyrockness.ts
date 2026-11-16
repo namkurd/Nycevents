@@ -70,9 +70,16 @@ export async function collectOhMyRockness(root: string, days = 28): Promise<Coll
       try { shows.push(...((await r.json()) as OmrShow[])); } catch { /* not JSON */ }
     });
     for (let n = 1; n <= PAGES; n++) {
-      await page.goto(`https://www.ohmyrockness.com/shows${n > 1 ? `?page=${n}` : ''}`, { waitUntil: 'networkidle', timeout: 60000 });
-      await page.waitForTimeout(800);
-      if (n === 1 && isChallenge(await page.title(), await page.content())) throw new Error('bot check shown; skipped this run');
+      // Wait for the show data itself, not for the page to go quiet (ads keep the network busy).
+      const data = page.waitForResponse(r => r.url().includes('/api/shows.json') && r.url().includes(`page=${n}&`), { timeout: 30000 }).catch(() => null);
+      await page.goto(`https://www.ohmyrockness.com/shows${n > 1 ? `?page=${n}` : ''}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      const got = await data;
+      if (!got) {
+        if (n === 1 && isChallenge(await page.title(), await page.content())) throw new Error('bot check shown; skipped this run');
+        if (n === 1) throw new Error('show data did not load');
+        break; // later pages are a bonus; keep what we have
+      }
+      await page.waitForTimeout(300); // let the response handler finish reading the body
     }
   });
   if (!shows.length) throw new Error('no show data captured');

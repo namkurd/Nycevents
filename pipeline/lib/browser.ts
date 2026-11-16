@@ -9,9 +9,10 @@ const require = createRequire(import.meta.url);
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
 
 // Minimal shapes of the Playwright API used here.
-export interface PwResponse { url(): string; status(): number; json(): Promise<unknown> }
+export interface PwResponse { url(): string; status(): number; json(): Promise<unknown>; text(): Promise<string> }
 export interface PwPage {
-  goto(url: string, o?: { waitUntil?: string; timeout?: number }): Promise<unknown>;
+  goto(url: string, o?: { waitUntil?: string; timeout?: number }): Promise<PwResponse | null>;
+  waitForResponse(pred: (r: PwResponse) => boolean, o?: { timeout?: number }): Promise<PwResponse>;
   content(): Promise<string>;
   title(): Promise<string>;
   waitForTimeout(ms: number): Promise<void>;
@@ -38,3 +39,4 @@ export async function withPage<T>(fn: (page: PwPage) => Promise<T>): Promise<T> 
 export function isChallenge(title: string, html: string): boolean {
   return /just a moment|attention required|security verification/i.test(title) || /cf-challenge|challenge-platform\/h\/[a-z]\/orchestrate/i.test(html.slice(0, 20000));
 }
+

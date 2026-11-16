@@ -23,6 +23,8 @@ export function feedItems(xml: string): FeedItem[] {
 }
 
 export async function collectSubstack(root: string, source: SubstackSource): Promise<CollectResult> {
+  // Substack refuses some data-center clients (GitHub Actions gets 403). That is a block, so we report
+  // the source as failed rather than working around it.
   const xml = await getText(FEEDS[source], { accept: 'application/rss+xml' });
   await saveRaw(root, source, 'feed.xml', xml);
   const since = addDays(nyToday(), -8);
