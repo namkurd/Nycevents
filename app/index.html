@@ -91,7 +91,23 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .pill { padding: 7px 12px; font-size: 13px; }
 }
 @media (max-width: 700px) {
-  #filtersToggle { display: inline-flex; }
+  /* Condensed sticky header: one line per control, sideways scroll instead of wrapping */
+  .bar { padding-block: 8px 8px; gap: 6px; }
+  .bar .row { gap: 6px; }
+  .brand { font-size: 0; margin-right: 0; } /* just the logo square on phones */
+  .bar .row:first-child { flex-wrap: nowrap; }
+  .range { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .range { font-size: 14px; }
+  .bar .icon-btn { width: 38px; height: 38px; }
+  .bar .btn { min-height: 38px; padding: 7px 12px; }
+  .bar .seg { flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; border-radius: 999px; }
+  .bar .seg::-webkit-scrollbar { display: none; }
+  .bar .seg button { flex: none; min-height: 36px; padding: 6px 12px; }
+  #modeSeg { flex: 0 0 auto; }
+  #whenSeg { flex-wrap: nowrap; border-radius: 999px; }
+  .bar .search { order: 10; flex: 1 1 90px; min-width: 0; width: auto; min-height: 38px; padding-block: 6px; }
+  .bar .chip, .bar select.chip { min-height: 38px; padding: 6px 12px; }
+  #filtersToggle:not([hidden]) { display: inline-flex; order: 11; }
   .bar:not(.filters-open) #filters { display: none; }
   .swipe-hint { display: block; color: var(--muted); font-size: 12px; text-align: center; }
 }
@@ -211,8 +227,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 .rh-meta { color: var(--muted); font-size: 12.5px; }
 .meter { height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 .meter i { display: block; height: 100%; border-radius: 999px; }
-.rh-matches { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 250px); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; scrollbar-width: thin; }
-.rh-matches > * { scroll-snap-align: start; }
+.rh-matches { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
 .rh { content-visibility: auto; contain-intrinsic-size: auto 340px; }
 .rh-form { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-items: end; }
 .rh-form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -274,8 +289,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       <button data-when="week">Next 7 days</button><button data-when="tonight">Tonight</button><button data-when="tomorrow">Tomorrow</button><button data-when="weekend">This weekend</button><button data-when="nextweek">Next week</button>
     </div>
     <input class="search" id="q" type="search" placeholder="Search titles, venues&hellip;" aria-label="Search">
+    <button class="chip" id="filtersToggle" aria-expanded="false" aria-controls="filters">Filters</button>
   </div>
-  <button class="chip" id="filtersToggle" aria-expanded="false" aria-controls="filters">Filters</button>
   <div class="row" id="filters">
     <button class="chip" id="fFree" aria-pressed="false">Free</button>
     <button class="chip" id="fDirect" aria-pressed="false" title="Within a 5-minute walk of a stop on your home routes">Direct from home</button>
@@ -393,7 +408,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
     rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
-    home: null, follow: {}, lite: null, useLite: false,
+    home: null, follow: {}, lite: null, useLite: false, rhOpen: new Set(),
   };
 
   // ---------- data ----------
@@ -782,20 +797,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     return sec;
   }
   function emptyNote(msg) { return el('div', { class: 'notice', text: msg }); }
-  function dueBar(events) {
-    const due = rItems().filter(r => rStatus(r).state !== 'greenin').sort(rOrder);
-    const active = S.f.rhythm ? S.rhythms.items[S.f.rhythm] : null;
-    if (!due.length && !active) return null;
-    const bar = el('div', { class: 'due' }, el('span', { class: 'lbl', text: 'Due for' }));
-    const pool = events.filter(e => passes(e, { ignoreMode: true }));
-    for (const r of due) {
-      const st = rStatus(r);
-      const n = pool.filter(e => rMatches(r, e)).length;
-      bar.append(el('button', { class: `pill ${st.state}`, 'aria-pressed': String(S.f.rhythm === r.id), title: `${rLabel(r)}. Show matching events.`, onclick: () => { S.f.rhythm = S.f.rhythm === r.id ? '' : r.id; render(); } }, `${r.name} · ${n}`));
-    }
-    if (active) bar.append(el('button', { class: 'more-btn', onclick: () => { S.f.rhythm = ''; render(); }, text: `Clear "${active.name}"` }));
-    return bar;
-  }
   function inWindow(d) { const w = S.index?.window; return !w || (d >= w.from && d <= w.to); }
 
   // ---------- views ----------
@@ -804,7 +805,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const { events, ongoing } = eventsIn(from, to);
     const narrow = window.matchMedia('(max-width: 900px)').matches;
     const wrap = el('div', { class: 'agenda' });
-    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     const t = today();
     if (narrow) { wrap.append(agendaDays(from, to, events, 'list')); return wrap; }
@@ -846,7 +846,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const to = addDays(from, 6);
     const { events, ongoing } = eventsIn(from, to);
     const wrap = el('div', { class: 'agenda' });
-    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     wrap.append(agendaDays(from, to, events, 'list'));
     return wrap;
@@ -855,7 +854,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const { events, ongoing } = eventsIn(d, d);
     const list = balance(events.filter(e => passes(e)));
     const wrap = el('div', { class: 'agenda' });
-    const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
     if (!inWindow(d)) { wrap.append(emptyNote(`Listings cover ${shortDate(S.index.window.from)} to ${shortDate(S.index.window.to)}.`)); return wrap; }
     const { shown, extra } = capList(list, CAP.day[S.mode]);
@@ -934,7 +932,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const pool = events.filter(e => forUsCandidate(e) && !(dayOf(e) === t && hhmm(e) && hhmm(e) < (S.when === 'tonight' ? '16:00' : nowHm)));
     const wrap = el('div', { class: 'feed' });
     if (S.useLite) wrap.append(el('div', { class: 'hint', text: 'Showing picks first; followed venues and rhythm suggestions are loading…' }));
-    const db0 = S.useLite ? null : dueBar(events); if (db0) wrap.append(db0);
     const sections = [];
     if (S.when === 'week') {
       const [ws, we] = whenRange('weekend');
@@ -1027,12 +1024,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
         el('div', { class: 'meter', title: `${pct}% of the way to the goal` }, el('i', { style: `width:${pct}%;background:${color}` })));
       if (S.editing === r.id) card.append(rForm(r));
       if (st.state !== 'greenin') {
-        // Best few per day for the next month, in date order, so the strip scrolls through time.
+        // The best match per day for the next month, in date order; a few at first, more on request.
         const all = events.filter(e => rMatches(r, e));
         const perDay = new Map();
-        for (const e of all.sort(byScore)) { const d = dayOf(e); const l = perDay.get(d) || perDay.set(d, []).get(d); if (l.length < 3) l.push(e); }
-        const m = [...perDay.values()].flat().sort((a, b) => a.start.localeCompare(b.start)).slice(0, 60);
-        if (m.length) card.append(el('div', { class: 'section-label', text: `Coming up that fits · next month · ${all.length.toLocaleString()} matches` }), el('div', { class: 'rh-matches' }, m.map(e => stub(e, { showDate: true }))));
+        for (const e of all.sort(byScore)) { const d = dayOf(e); if (!perDay.has(d)) perDay.set(d, e); }
+        const m = [...perDay.values()].sort((a, b) => a.start.localeCompare(b.start));
+        const open = S.rhOpen.has(r.id), shown = m.slice(0, open ? 24 : 4);
+        if (m.length) card.append(el('div', { class: 'section-label', text: `Coming up that fits · next month · ${all.length.toLocaleString()} matches` }), el('div', { class: 'rh-matches' }, shown.map(e => stub(e, { showDate: true }))),
+          m.length > 4 ? el('button', { class: 'more-btn', onclick: () => { open ? S.rhOpen.delete(r.id) : S.rhOpen.add(r.id); render(); }, text: open ? 'Show fewer' : `Show ${Math.min(24, m.length) - 4} more dates` }) : null);
         else if (r.cats?.length || r.words?.length) card.append(el('div', { class: 'hint', text: 'Nothing in the next month matches yet.' }));
       }
       list.append(card);
@@ -1203,6 +1202,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     $('#prev').hidden = !nav; $('#next').hidden = !nav; $('#todayBtn').hidden = !nav;
     $('#modeSeg').hidden = !nav;
     $('#filters').hidden = S.view === 'rhythms';
+    $('#filtersToggle').hidden = S.view === 'rhythms';
   }
   function footer() {
     const ix = S.index; if (!ix) return null;
