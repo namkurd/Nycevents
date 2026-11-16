@@ -78,6 +78,17 @@ export function leanWeek(list: Event[]) {
   return { venues, events, ongoing };
 }
 
+/**
+ * The quick-start file the page shows first: the next 8 days of picks (and picked ongoing runs),
+ * a few hundred KB instead of a ~4 MB week file. The full weeks load in the background.
+ */
+export const LITE_FILE = 'lite.json';
+export function liteBody(all: Event[], from: string, generatedAt: string): string {
+  const to = addDays(from, 7);
+  const list = all.filter(e => e.pickedBy.length > 0 && !e.hide?.length && (e.ongoing ? e.ongoing.from <= to && e.ongoing.to >= from : e.start.slice(0, 10) >= from && e.start.slice(0, 10) <= to));
+  return JSON.stringify({ format: 2, lite: true, from, to, generatedAt, ...leanWeek(list) });
+}
+
 export async function run(): Promise<void> {
   const started = Date.now();
   const today = nyToday();
@@ -190,7 +201,10 @@ export async function run(): Promise<void> {
     transitTier1: valid.filter(e => e.transit?.tier === 1).length,
     transitTier2: valid.filter(e => e.transit?.tier === 2).length,
   };
-  const index = { generatedAt, window: { from: today, to: lastDay }, hiddenByDefault: HIDE_REASONS, sources: status, weeks, counts };
+  const lite = liteBody(valid, today, generatedAt);
+  await writeFile(join(ROOT, 'dist', LITE_FILE), lite);
+  console.log(`dist/${LITE_FILE}  quick-start picks ${(Buffer.byteLength(lite) / 1e3).toFixed(0)} KB`);
+  const index = { generatedAt, window: { from: today, to: lastDay }, hiddenByDefault: HIDE_REASONS, sources: status, weeks, lite: LITE_FILE, counts };
   await writeFile(join(ROOT, 'dist', 'index.json'), JSON.stringify(index, null, 2));
 
   console.log(`\n${counts.collected} collected -> ${counts.afterDedupe} events (${counts.mergedDuplicates} duplicates merged, ${counts.invalidDropped} invalid dropped)`);

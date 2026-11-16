@@ -73,6 +73,28 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .seg button { border: 0; background: transparent; padding: 5px 11px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
 #whenSeg { flex-wrap: wrap; border-radius: 16px; }
+#filtersToggle { display: none; justify-self: start; }
+.swipe-hint { display: none; }
+
+/* Phones and touch screens: bigger targets, collapsible filters, swipe between days */
+@media (max-width: 700px), (pointer: coarse) {
+  .seg button { padding: 10px 14px; min-height: 42px; font-size: 14px; }
+  .chip, select.chip { padding: 9px 13px; min-height: 42px; font-size: 14px; }
+  .btn { padding: 10px 15px; min-height: 44px; font-size: 14px; }
+  .icon-btn { width: 44px; height: 44px; font-size: 20px; }
+  .more-btn { padding: 12px 4px; font-size: 14px; }
+  .ev { padding: 12px 11px 12px 10px; }
+  .status button { min-height: 52px; font-size: 15px; }
+  .drawer .close { width: 44px; height: 44px; }
+  .drawer .actions .btn { flex: 1 1 140px; text-align: center; }
+  .search { min-height: 44px; font-size: 16px; }
+  .pill { padding: 7px 12px; font-size: 13px; }
+}
+@media (max-width: 700px) {
+  #filtersToggle { display: inline-flex; }
+  .bar:not(.filters-open) #filters { display: none; }
+  .swipe-hint { display: block; color: var(--muted); font-size: 12px; text-align: center; }
+}
 #viewSeg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 #viewSeg::-webkit-scrollbar { display: none; }
 #viewSeg button { flex: none; }
@@ -253,6 +275,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     </div>
     <input class="search" id="q" type="search" placeholder="Search titles, venues&hellip;" aria-label="Search">
   </div>
+  <button class="chip" id="filtersToggle" aria-expanded="false" aria-controls="filters">Filters</button>
   <div class="row" id="filters">
     <button class="chip" id="fFree" aria-pressed="false">Free</button>
     <button class="chip" id="fDirect" aria-pressed="false" title="Within a 5-minute walk of a stop on your home routes">Direct from home</button>
@@ -370,7 +393,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
     rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
-    home: null, follow: {},
+    home: null, follow: {}, lite: null, useLite: false,
   };
 
   // ---------- data ----------
@@ -399,6 +422,9 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     await Promise.all(tasks);
   }
   function eventsIn(from, to) {
+    if (S.useLite && S.lite) {
+      return { events: S.lite.events.filter(e => dayOf(e) >= from && dayOf(e) <= to), ongoing: S.lite.ongoing.filter(e => e.ongoing.from <= to && e.ongoing.to >= from) };
+    }
     const out = []; const seenOngoing = new Set(); const ongoing = [];
     for (const w of weeksFor(from, to)) {
       for (const map of [S.weeks, S.hiddenWeeks]) {
@@ -907,7 +933,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const nowHm = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
     const pool = events.filter(e => forUsCandidate(e) && !(dayOf(e) === t && hhmm(e) && hhmm(e) < (S.when === 'tonight' ? '16:00' : nowHm)));
     const wrap = el('div', { class: 'feed' });
-    const db0 = dueBar(events); if (db0) wrap.append(db0);
+    if (S.useLite) wrap.append(el('div', { class: 'hint', text: 'Showing picks first; followed venues and rhythm suggestions are loading…' }));
+    const db0 = S.useLite ? null : dueBar(events); if (db0) wrap.append(db0);
     const sections = [];
     if (S.when === 'week') {
       const [ws, we] = whenRange('weekend');
@@ -1168,6 +1195,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const nHidden = Object.values(S.showHidden).filter(Boolean).length;
     $('#hiddenSummary').textContent = nHidden ? `Hidden groups · ${nHidden} shown` : 'Hidden groups';
     $('#range').textContent = rangeLabel();
+    const nActive = [S.f.free, S.f.direct, S.f.both, S.f.following, S.f.tod !== 'any', !!S.f.boro, S.f.cats.size > 0].filter(Boolean).length;
+    $('#filtersToggle').textContent = nActive ? `Filters · ${nActive}` : 'Filters';
     const nav = !['ours', 'rhythms', 'forus'].includes(S.view);
     $('#whenSeg').hidden = S.view !== 'forus';
     for (const b of document.querySelectorAll('#whenSeg button')) b.setAttribute('aria-pressed', String(b.dataset.when === S.when));
@@ -1193,11 +1222,16 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (!['ours', 'rhythms'].includes(S.view)) {
       const [from, to] = S.view === 'forus' ? whenRange(S.when) : rangeFor();
       const pending = weeksFor(from, to).some(w => !S.weeks.has(w.week) || (Object.values(S.showHidden).some(Boolean) && !S.hiddenWeeks.has(w.week)));
-      if (pending) {
-        if (!main.querySelector('.agenda')) main.replaceChildren(emptyNote('Loading listings…'));
+      if (pending && S.view === 'forus' && S.lite) {
+        // Show the quick-start picks now; re-render with everything once the full weeks arrive.
+        S.useLite = true;
+        ensureWeeks(from, to).then(() => { if (token === renderToken) render(); });
+      } else if (pending) {
+        S.useLite = false;
+        if (!main.querySelector('.agenda, .feed')) main.replaceChildren(emptyNote('Loading listings…'));
         await ensureWeeks(from, to);
         if (token !== renderToken) return;
-      }
+      } else S.useLite = false;
     } else {
       const from = today();
       await ensureWeeks(from, addDays(from, S.view === 'rhythms' ? 31 : 34));
@@ -1211,7 +1245,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     else if (S.view === 'rhythms') body = viewRhythms();
     else if (S.view === 'forus') body = viewForUs();
     else body = viewOurs();
-    main.replaceChildren(body, footer() || '');
+    const swipe = ['day', 'week', 'list', 'month', 'forus'].includes(S.view) ? el('div', { class: 'swipe-hint', text: S.view === 'forus' ? 'Swipe left or right to change the time window' : `Swipe left or right for the ${S.view === 'month' ? 'next month' : S.view === 'day' ? 'next day' : 'next week'}` }) : null;
+    main.replaceChildren(...(swipe ? [swipe] : []), body, footer() || '');
   }
 
   // ---------- controls ----------
@@ -1237,6 +1272,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   $('#modeSeg').addEventListener('click', ev => { const m = ev.target.closest('button')?.dataset.mode; if (m) { S.mode = m; store.set('mode', m); render(); } });
   $('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);
   $('#todayBtn').onclick = () => { S.anchor = today(); render(); };
+  $('#filtersToggle').onclick = () => { const open = $('#bar').classList.toggle('filters-open'); $('#filtersToggle').setAttribute('aria-expanded', String(open)); };
   $('#fFree').onclick = () => { S.f.free = !S.f.free; render(); };
   $('#fDirect').onclick = () => { S.f.direct = !S.f.direct; render(); };
   $('#fBoth').onclick = () => { S.f.both = !S.f.both; render(); };
@@ -1247,10 +1283,34 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   let lastNarrow = window.matchMedia('(max-width: 900px)').matches;
   window.addEventListener('resize', () => { const n = window.matchMedia('(max-width: 900px)').matches; if (n !== lastNarrow) { lastNarrow = n; render(); } });
 
+  // ---------- swipe (phones): left/right moves between days, weeks, months or time presets ----------
+  let touch = null;
+  $('#main').addEventListener('touchstart', ev => {
+    if (ev.touches.length !== 1 || ev.target.closest('.strip, .rh-matches, input, textarea, select')) { touch = null; return; }
+    touch = { x: ev.touches[0].clientX, y: ev.touches[0].clientY, t: Date.now() };
+  }, { passive: true });
+  $('#main').addEventListener('touchend', ev => {
+    if (!touch) return;
+    const dx = ev.changedTouches[0].clientX - touch.x, dy = ev.changedTouches[0].clientY - touch.y, dt = Date.now() - touch.t;
+    touch = null;
+    if (dt > 700 || Math.abs(dx) < 70 || Math.abs(dx) < 1.6 * Math.abs(dy)) return;
+    const dir = dx < 0 ? 1 : -1;
+    if (['day', 'week', 'list', 'month'].includes(S.view)) { step(dir); window.scrollTo({ top: 0 }); return; }
+    if (S.view === 'forus') {
+      const order = ['week', 'tonight', 'tomorrow', 'weekend', 'nextweek'];
+      S.when = order[(order.indexOf(S.when) + dir + order.length) % order.length];
+      render(); window.scrollTo({ top: 0 });
+    }
+  }, { passive: true });
+
   // ---------- boot ----------
   buildFilters();
   syncControls();
-  getJSON('index.json').then(ix => { S.index = ix; render(); }).catch(err => {
+  getJSON('index.json').then(async ix => {
+    S.index = ix;
+    if (ix.lite && S.view === 'forus') { try { S.lite = expand(ix.lite, await getJSON(ix.lite)); } catch (err) { console.warn('quick-start file did not load', err); } }
+    render();
+  }).catch(err => {
     console.warn(err);
     $('#main').replaceChildren(emptyNote('The listings file did not load. The daily update may still be running; reload in a minute.'));
   });

@@ -9,7 +9,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { leanWeek } from './build.ts';
+import { leanWeek, liteBody, LITE_FILE } from './build.ts';
 import { collectSubstack } from './collectors/substack.ts';
 import { sameEvent } from './dedupe.ts';
 import { eventId, normKey } from './lib/text.ts';
@@ -131,6 +131,8 @@ async function main() {
     await writeFile(join(dir, w.hiddenFile), JSON.stringify({ ...head, ...leanWeek(hidden) }));
     Object.assign(w, { events: shown.filter(e => !e.ongoing).length, ongoing: shown.filter(e => e.ongoing).length, hidden: hidden.length, bytes: Buffer.byteLength(body) });
   }
+  await writeFile(join(dir, LITE_FILE), liteBody(all, index.window.from, index.generatedAt));
+  (index as IndexFile & { lite?: string }).lite = LITE_FILE;
   index.counts = { ...index.counts, afterDedupe: pool.size, picks: all.filter(isPick).length, newslettersMergedAt: new Date().toISOString() };
   await writeFile(join(dir, 'index.json'), JSON.stringify(index, null, 2));
   console.log(`picks now ${index.counts.picks}`);

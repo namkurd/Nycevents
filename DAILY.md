@@ -20,7 +20,7 @@ GitHub's servers cannot read the three Substack newsletters (Substack refuses th
 3. Run `cd app && npm ci && npm run newsletters -- --data=../data`. This fetches field notes, City Happenings and Reading the City, adds picks to matching events, adds new ones, and rewrites the week files and `index.json` in `data/`.
 4. Publish with the Artifact tool to `https://claude.ai/artifact/7Gux5vJioAx6CaepNhEP9z`:
    - `file_path`: `app/app/index.html`
-   - `files`: `index.json` plus every `file` and `hiddenFile` listed in `data/index.json`, each mapped to `data/<name>`.
+   - `files`: `index.json`, `lite.json` (the quick-start picks file the page shows first; the `lite` entry in `index.json`), plus every `file` and `hiddenFile` listed in `data/index.json`, each mapped to `data/<name>`. The page still works if `lite.json` is missing; it just waits for the full weeks.
    - Leave out `capabilities` so the stored ones are kept.
 5. Report one line: `generatedAt`, the count per source, the newsletter merge result, and any failed source.
 
