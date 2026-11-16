@@ -26,6 +26,7 @@
   --st-over: #8a5a00; --st-over-bg: #fff2c7;
   --st-cool: #1d4f91; --st-cool-bg: #dbe8fb;
   --st-green: #1c6b41; --st-green-bg: #d5f0e1;
+  --c-art: #d9480f; --c-film: #7048e8; --c-music: #d6336c; --c-talks: #1c7ed6; --c-books: #8a5a2b; --c-theater-dance: #c92a2a; --c-comedy: #c99400; --c-food-drink: #5c940d; --c-outdoors: #2b8a3e; --c-community: #0c8599; --c-nightlife: #4c3fbf; --c-kids: #ae3ec9; --c-fitness: #5c6b7a; --c-other: #7a716a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -33,6 +34,7 @@
     --accent: #7fa3ff; --accent-ink: #0b1430; --marker: #e7bd1f; --marker-ink: #1d1700; --good: #4cc38a; --warn: #e3a64a;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
     --st-over: #f2c35b; --st-over-bg: #3a2d0c; --st-cool: #9cc2ff; --st-cool-bg: #172a46; --st-green: #7fd9a8; --st-green-bg: #13311f;
+    --c-art: #ff8a4c; --c-film: #a38bff; --c-music: #ff7aa8; --c-talks: #6fb3ff; --c-books: #d6a46a; --c-theater-dance: #ff7373; --c-comedy: #ffd24a; --c-food-drink: #a6d95a; --c-outdoors: #6fd38a; --c-community: #4fd1e0; --c-nightlife: #9d93ff; --c-kids: #e08cf2; --c-fitness: #a8b5c2; --c-other: #bdb4ad;
     color-scheme: dark;
   }
 }
@@ -41,6 +43,7 @@
   --accent: #7fa3ff; --accent-ink: #0b1430; --marker: #e7bd1f; --marker-ink: #1d1700; --good: #4cc38a; --warn: #e3a64a;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
   --st-over: #f2c35b; --st-over-bg: #3a2d0c; --st-cool: #9cc2ff; --st-cool-bg: #172a46; --st-green: #7fd9a8; --st-green-bg: #13311f;
+  --c-art: #ff8a4c; --c-film: #a38bff; --c-music: #ff7aa8; --c-talks: #6fb3ff; --c-books: #d6a46a; --c-theater-dance: #ff7373; --c-comedy: #ffd24a; --c-food-drink: #a6d95a; --c-outdoors: #6fd38a; --c-community: #4fd1e0; --c-nightlife: #9d93ff; --c-kids: #e08cf2; --c-fitness: #a8b5c2; --c-other: #bdb4ad;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -74,6 +77,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .chip { border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
 .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+.chip .icn.sm { margin-left: -3px; }
 .search { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; min-width: 0; width: 190px; font-size: 13px; }
 select.chip { appearance: none; padding-right: 22px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 12px) 50%, calc(100% - 8px) 50%; background-size: 4px 4px; background-repeat: no-repeat; }
 .people { display: inline-flex; gap: 4px; align-items: center; }
@@ -105,12 +109,21 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 /* Event stub */
 .ev { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 9px 8px 8px; min-width: 0; }
 .ev:hover { border-color: var(--muted); }
-.ev .t { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); grid-row: span 3; padding-top: 1px; min-width: 38px; }
+.ev .t { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); grid-row: span 3; padding-top: 1px; min-width: 40px; display: grid; gap: 5px; align-content: start; justify-items: start; }
+.ev .t .d { color: var(--ink); font-weight: 500; }
+.icn { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; flex: none; }
+.icn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icn.sm { width: 16px; height: 16px; border-radius: 4px; background: none !important; }
+.icn.sm svg { width: 13px; height: 13px; }
+.grp { display: grid; gap: 6px; }
+.grp-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; padding-top: 2px; }
+.grp-head .n { color: var(--muted); font-weight: 500; font-family: var(--font-mono); font-size: 12px; }
+.slot { border-top: 1px solid var(--line); padding-top: 10px; }
+.slot > h3 { font-size: 12px !important; }
 .ev .ttl { font-weight: 650; font-size: 13.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .ev .ven { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev .badges { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 2px; }
 .ev.pick { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
-.ev .cat { position: absolute; left: -1px; top: 10px; width: 3px; height: 16px; border-radius: 0 3px 3px 0; }
 .ev .marks { position: absolute; right: 6px; top: 6px; display: flex; gap: 2px; }
 .ev .marks .avatar { width: 18px; height: 18px; font-size: 9px; border-width: 1.5px; border-color: var(--surface); }
 .ev.marked .ttl { padding-right: 24px; }
@@ -141,7 +154,8 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .cell.today { border-color: var(--accent); }
 .cell .n { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .cell .n b { color: var(--ink); font-weight: 600; }
-.cell .mini { font-size: 11.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell .mini { font-size: 11.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
+.cell .mini span { overflow: hidden; text-overflow: ellipsis; }
 .cell .mini.pick { font-weight: 650; }
 
 /* Rhythms */
@@ -160,7 +174,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 .rh-meta { color: var(--muted); font-size: 12.5px; }
 .meter { height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 .meter i { display: block; height: 100%; border-radius: 999px; }
-.rh-matches { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.rh-matches { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 250px); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.rh-matches > * { scroll-snap-align: start; }
 .rh-form { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-items: end; }
 .rh-form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
 .rh-form input, .rh-form select { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 8px; font-size: 13px; color: var(--ink); min-width: 0; }
@@ -249,12 +264,41 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 (() => {
   'use strict';
   // ---------- constants ----------
-  const CATS = {
-    art: ['Art', '#c2410c'], film: ['Film', '#7c3aed'], music: ['Music', '#db2777'], talks: ['Talks', '#0e7490'],
-    books: ['Books', '#b45309'], 'theater-dance': ['Theater & dance', '#be123c'], comedy: ['Comedy', '#ca8a04'],
-    'food-drink': ['Food & drink', '#65a30d'], outdoors: ['Outdoors', '#15803d'], community: ['Community', '#2563eb'],
-    nightlife: ['Nightlife', '#6d28d9'], kids: ['Kids', '#0891b2'], fitness: ['Fitness', '#64748b'], other: ['Other', '#78716c'],
+  const CAT_LABELS = {
+    art: 'Art', film: 'Film', music: 'Music', talks: 'Talks', books: 'Books', 'theater-dance': 'Theater & dance', comedy: 'Comedy',
+    'food-drink': 'Food & drink', outdoors: 'Outdoors', community: 'Community', nightlife: 'Nightlife', kids: 'Kids', fitness: 'Fitness', other: 'Other',
   };
+  // Each type's colour is a theme token (--c-<type>), so it reads in light and dark.
+  const CATS = Object.fromEntries(Object.entries(CAT_LABELS).map(([k, label]) => [k, [label, `var(--c-${k})`]]));
+  const CAT_ORDER = Object.keys(CAT_LABELS);
+  // Stroke icons on a 24-unit grid (drawn for this page).
+  const ICON_PATHS = {
+    art: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.9-.7-1.2-.7-2.1 0-.8.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4c0-4.4-4-8.8-9-8.8z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="8" r="1"/>',
+    film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+    music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+    talks: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
+    books: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+    'theater-dance': '<path d="M3 4h10v6a5 5 0 0 1-10 0z"/><path d="M13 8h8v6a5 5 0 0 1-9.2 2.7"/><path d="M6 8h.01M10 8h.01M6.5 12.5c1 .7 2 .7 3 0"/>',
+    comedy: '<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2.2 4 2.2 4-2.2 4-2.2M9 9h.01M15 9h.01"/>',
+    'food-drink': '<path d="M4 3v8a3 3 0 0 0 6 0V3M7 3v18M17 3c-2 2-3 4.5-3 7.5h6c0-3-1-5.5-3-7.5zM17 10.5V21"/>',
+    outdoors: '<path d="M12 3l6 9h-4l4 6H6l4-6H6z"/><path d="M12 18v3"/>',
+    community: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2A5 5 0 0 1 21 19"/>',
+    nightlife: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M17 3v3M15.5 4.5h3"/>',
+    kids: '<path d="M12 3a5 5 0 0 0-5 5c0 3 2.5 6 5 7 2.5-1 5-4 5-7a5 5 0 0 0-5-5z"/><path d="M11 17h2l-1-2zM12 17c0 2-2 2.2-2 4"/>',
+    fitness: '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+    other: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L3.4 9.3l6-.7z"/>',
+  };
+  /** A coloured icon for an event type. `sm` drops the tinted tile (for inline use). */
+  function icon(cat, sm) {
+    const k = ICON_PATHS[cat] ? cat : 'other';
+    const n = document.createElement('span');
+    n.className = 'icn' + (sm ? ' sm' : '');
+    n.setAttribute('aria-hidden', 'true');
+    n.style.color = `var(--c-${k})`;
+    if (!sm) n.style.background = `color-mix(in srgb, var(--c-${k}) 15%, transparent)`;
+    n.innerHTML = `<svg viewBox="0 0 24 24">${ICON_PATHS[k]}</svg>`;
+    return n;
+  }
   const SOURCES = { fomo: 'fomo.nyc', nycforfree: 'NYC for FREE', skint: 'The Skint', cityhappenings: 'City Happenings', readingthecity: 'Reading the City', fieldnotes: 'field notes', ohmyrockness: 'Oh My Rockness', thoughtgallery: 'Thought Gallery', curated: 'Curated' };
   const SHORT = { nycforfree: 'NYC4FREE', skint: 'Skint', cityhappenings: 'City Hap.', readingthecity: 'Reading', fieldnotes: 'Field notes', ohmyrockness: 'OMR', thoughtgallery: 'Thought G.', curated: 'Curated' };
   const HIDDEN = { fitness: 'Fitness classes', 'brand-popup': 'Brand pop-ups', 'chain-cinema': 'Chain cinema showtimes' };
@@ -577,8 +621,10 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const markers = markersOf(e.id);
     const cat = CATS[e.category] || CATS.other;
     const node = el('button', { class: `ev${e.pickedBy.length ? ' pick' : ''}${markers.length ? ' marked' : ''}`, onclick: () => openDrawer(e), 'aria-label': `${e.title}, ${opts.showDate ? dLabel(dayOf(e)) + ' ' : ''}${clock(hhmm(e))}, ${e.venue.name}` },
-      el('span', { class: 'cat', style: `background:${cat[1]}`, 'aria-hidden': 'true' }),
-      el('span', { class: 't', text: opts.ongoing ? 'Thru ' + shortDate(e.ongoing.to) : clock(hhmm(e)) }),
+      el('span', { class: 't', title: cat[0] },
+        opts.showDate && !opts.ongoing ? el('span', { class: 'd', text: `${DOW[dow(dayOf(e))]} ${shortDate(dayOf(e))}` }) : null,
+        el('span', { text: opts.ongoing ? 'Thru ' + shortDate(e.ongoing.to) : clock(hhmm(e)) }),
+        icon(e.category)),
       el('span', { class: 'ttl', text: e.title }),
       el('span', { class: 'ven', text: e.venue.name + (e.venue.borough ? ' · ' + e.venue.borough : '') }),
       el('span', { class: 'badges' }, badges(e)),
@@ -677,7 +723,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const slots = [['All day', e => !hhmm(e)], ['Morning', e => hhmm(e) && hhmm(e) < '12:00'], ['Afternoon', e => hhmm(e) >= '12:00' && hhmm(e) < '17:00'], ['Evening', e => hhmm(e) >= '17:00' && hhmm(e) < '21:00'], ['Late', e => hhmm(e) >= '21:00']];
     for (const [name, fn] of slots) {
       const s = shown.filter(fn); if (!s.length) continue;
-      wrap.append(el('section', { class: 'slot' }, el('h3', { text: `${name} · ${s.length}` }), el('div', { class: 'grid' }, s.map(e => stub(e)))));
+      // Within each block, one group per event type, biggest group first.
+      const groups = new Map();
+      for (const e of s) (groups.get(e.category) || groups.set(e.category, []).get(e.category)).push(e);
+      const ordered = [...groups.entries()].sort((a, b) => b[1].length - a[1].length || CAT_ORDER.indexOf(a[0]) - CAT_ORDER.indexOf(b[0]));
+      wrap.append(el('section', { class: 'slot' }, el('h3', { text: `${name} · ${s.length}` }),
+        ordered.map(([cat, list]) => el('div', { class: 'grp' },
+          el('div', { class: 'grp-head' }, icon(cat), (CATS[cat] || CATS.other)[0], el('span', { class: 'n', text: String(list.length) })),
+          el('div', { class: 'grid' }, list.map(e => stub(e)))))));
     }
     if (!list.length) wrap.append(emptyNote(S.mode === 'picks' ? 'No picks this day. Switch to Everything to see all listings.' : 'Nothing matches these filters.'));
     if (extra) wrap.append(el('div', { class: 'hint', text: `Showing the top ${shown.length} of ${list.length.toLocaleString()} by score. Narrow with search or filters to see the rest.` }));
@@ -698,7 +751,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       const out = d.slice(5, 7) !== first.slice(5, 7) || !inWindow(d);
       grid.append(el('button', { class: `cell${out ? ' out' : ''}${d === t ? ' today' : ''}`, onclick: () => { S.anchor = d; setView('day'); }, 'aria-label': `${dLabel(d)}: ${list.length} events` },
         el('span', { class: 'n' }, el('b', { text: +d.slice(8) }), el('span', { text: inWindow(d) ? String(list.length) : '' })),
-        list.slice(0, 3).map(e => el('span', { class: `mini${e.pickedBy.length ? ' pick' : ''}`, text: `${hhmm(e) ? clock(hhmm(e)) + ' ' : ''}${e.title}` }))));
+        list.slice(0, 3).map(e => el('span', { class: `mini${e.pickedBy.length ? ' pick' : ''}` }, icon(e.category, true), el('span', { text: `${hhmm(e) ? clock(hhmm(e)) + ' ' : ''}${e.title}` })))));
     }
     return el('div', { class: 'agenda' }, grid, el('div', { class: 'hint', text: 'Each day shows its top three by score. Tap a day to see everything.' }));
   }
@@ -744,7 +797,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     wrap.append(head, el('div', { class: 'hint', text: 'How often you want to do each kind of thing. Logging one pushes similar events down the calendar, then they climb back as the next date comes due.' }));
     if (!db) wrap.append(emptyNote('Rhythms are saved on claude.ai; open the published page to use them.'));
     if (S.editing === 'new') wrap.append(rForm(null));
-    const { events } = eventsIn(today(), addDays(today(), 20));
+    const { events } = eventsIn(today(), addDays(today(), 31));
     const list = el('div', { class: 'rh-list' });
     for (const r of items) {
       const st = rStatus(r);
@@ -762,9 +815,13 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
         el('div', { class: 'meter', title: `${pct}% of the way to the goal` }, el('i', { style: `width:${pct}%;background:${color}` })));
       if (S.editing === r.id) card.append(rForm(r));
       if (st.state !== 'greenin') {
-        const m = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true })).sort(byScore).slice(0, 4);
-        if (m.length) card.append(el('div', { class: 'section-label', text: 'Coming up that fits' }), el('div', { class: 'rh-matches' }, m.map(e => stub(e, { showDate: true }))));
-        else if (r.cats?.length || r.words?.length) card.append(el('div', { class: 'hint', text: 'Nothing in the next three weeks matches yet.' }));
+        // Best few per day for the next month, in date order, so the strip scrolls through time.
+        const all = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true }));
+        const perDay = new Map();
+        for (const e of all.sort(byScore)) { const d = dayOf(e); const l = perDay.get(d) || perDay.set(d, []).get(d); if (l.length < 3) l.push(e); }
+        const m = [...perDay.values()].flat().sort((a, b) => a.start.localeCompare(b.start)).slice(0, 60);
+        if (m.length) card.append(el('div', { class: 'section-label', text: `Coming up that fits · next month · ${all.length.toLocaleString()} matches` }), el('div', { class: 'rh-matches' }, m.map(e => stub(e, { showDate: true }))));
+        else if (r.cats?.length || r.words?.length) card.append(el('div', { class: 'hint', text: 'Nothing in the next month matches yet.' }));
       }
       list.append(card);
     }
@@ -783,7 +840,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const last = el('input', { id: 'rf-last', type: 'date', value: r?.last || '' });
     const words = el('input', { id: 'rf-words', value: (r?.words || []).join(', '), placeholder: 'museum, gallery, opening' });
     const catBox = el('div', { class: 'row wide' }, Object.entries(CATS).map(([k, [label, color]]) => {
-      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String((r?.cats || []).includes(k)), onclick: () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')) }, el('span', { class: 'dot', style: `background:${color}` }), label);
+      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String((r?.cats || []).includes(k)), onclick: () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')) }, icon(k, true), label);
       b.dataset.cat = k; return b;
     }));
     f.append(
@@ -860,7 +917,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const statusBtn = (s, label) => el('button', { 'aria-pressed': String(mine.s === s), disabled: !S.canWrite, onclick: () => setMark(e, { s: mine.s === s ? undefined : s, n: myMark(e.id)?.n }), text: label });
     const d = el('aside', { class: 'drawer', role: 'dialog', 'aria-modal': 'true', 'aria-label': e.title },
       el('button', { class: 'icon-btn close', 'aria-label': 'Close', onclick: closeDrawer, text: '×' }),
-      el('div', { class: 'section-label', style: `color:${cat[1]}`, text: cat[0] }),
+      el('div', { class: 'row' }, icon(e.category), el('span', { class: 'section-label', style: `color:${cat[1]}`, text: cat[0] })),
       el('h2', { text: e.title }),
       el('div', { class: 'when', text: when }),
       el('div', { class: 'meta' },
@@ -952,7 +1009,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       }
     } else {
       const from = today();
-      await ensureWeeks(from, addDays(from, S.view === 'rhythms' ? 20 : 34));
+      await ensureWeeks(from, addDays(from, S.view === 'rhythms' ? 31 : 34));
       if (token !== renderToken) return;
     }
     let body;
@@ -970,7 +1027,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const cats = $('#cats');
     for (const [k, [label, color]] of Object.entries(CATS)) {
       const b = el('button', { class: 'chip', 'aria-pressed': String(S.f.cats.has(k)), onclick: () => { S.f.cats.has(k) ? S.f.cats.delete(k) : S.f.cats.add(k); store.set('cats', [...S.f.cats]); b.setAttribute('aria-pressed', String(S.f.cats.has(k))); render(); } },
-        el('span', { class: 'dot', style: `background:${color}` }), label);
+        icon(k, true), label);
       cats.append(b);
     }
     cats.append(el('button', { class: 'more-btn', onclick: () => { S.f.cats.clear(); store.set('cats', []); cats.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false')); render(); }, text: 'Clear' }));
