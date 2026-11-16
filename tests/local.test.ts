@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseIcsVenue, parseSquarespaceVenue, type LocalVenue } from '../pipeline/collectors/local.ts';
+import { eventbriteLinks, parseEventbriteEvent, parseIcsVenue, parseSquarespaceVenue, type LocalVenue } from '../pipeline/collectors/local.ts';
 import { parseIcs } from '../pipeline/lib/ics.ts';
 import { Event } from '../pipeline/schema.ts';
 
@@ -43,5 +43,27 @@ describe('local venues', () => {
     expect(sofia.title).toBe('Sofia Rei & JC Maillard');
     expect(sofia.url).toMatch(/^https:\/\/www\.barlunatico\.com\/calendar\//);
     expect(sofia.price.text).toMatch(/\$10/);
+  });
+});
+
+// Kvartira Books' Eventbrite organizer page and the schema.org data of its 12 event pages, fetched Nov 16, 2026.
+describe('Kvartira Books (Eventbrite)', () => {
+  const kv = venues.find(v => v.id === 'kvartira')!;
+  const pages: Record<string, string> = JSON.parse(fx('kvartira-events.json'));
+  it('finds each event page once', () => {
+    const links = eventbriteLinks(fx('kvartira-organizer.html'));
+    expect(links).toHaveLength(12);
+    expect(links.every(l => /^https:\/\/www\.eventbrite\.com\/e\/[a-z0-9-]*\d{9,}$/.test(l))).toBe(true);
+  });
+  it('keeps grown-up events inside the window and skips kids programs and season passes', () => {
+    const got = Object.entries(pages).map(([id, html]) => parseEventbriteEvent(kv, html, `https://www.eventbrite.com/e/${id}`, '2026-11-16', '2026-12-13')).filter(e => e != null);
+    valid(got);
+    expect(got.map(e => e!.title).sort()).toEqual(['Upcycling workshop для взрослых с Ольгой Сингх', 'Женя Заливина. Арт-музеи Нью-Йорка как личности']);
+    const talk = got.find(e => e!.title.startsWith('Женя'))!;
+    expect(talk.start).toBe('2026-11-19T19:30:00-05:00');
+    expect(talk.end).toBe('2026-11-19T21:30:00-05:00');
+    expect(talk.price).toEqual({ free: false, text: 'From $44.52 on Eventbrite' });
+    expect(talk.tags).toContain('Russian-language listing');
+    expect(talk.pickedBy).toEqual(['local']);
   });
 });

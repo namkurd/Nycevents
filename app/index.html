@@ -149,7 +149,6 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 260px); gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
 
 /* Week grid */
-.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: start; }
 .day { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 2px 2px 4px; border-bottom: 2px solid var(--ink); }
 .day-head .dname { font-weight: 800; font-stretch: 110%; font-size: 15px; }
@@ -200,16 +199,6 @@ main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: m
 .agenda .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
 
 /* Month */
-.month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-.month .dow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 0 4px; }
-.cell { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-height: 108px; padding: 6px; display: grid; align-content: start; gap: 3px; text-align: left; min-width: 0; }
-.cell.out { background: transparent; border-style: dashed; }
-.cell.today { border-color: var(--accent); }
-.cell .n { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
-.cell .n b { color: var(--ink); font-weight: 600; }
-.cell .mini { font-size: 11.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; }
-.cell .mini span { overflow: hidden; text-overflow: ellipsis; }
-.cell .mini.pick { font-weight: 650; }
 
 /* Rhythms */
 .due { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -263,7 +252,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 @media (max-width: 900px) {
   .search { width: 100%; order: 10; }
   .drawer { top: auto; left: 0; width: 100%; max-height: 88vh; border-left: 0; border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; padding-left: max(18px, env(safe-area-inset-left, 0px)); }
-  .cell { min-height: 72px; } .cell .mini { display: none; } .cell .mini:first-of-type { display: block; }
 }
 @media (prefers-reduced-motion: no-preference) { .drawer { animation: slide .18s ease-out; } @keyframes slide { from { transform: translateY(8px); opacity: .6; } } }
 </style>
@@ -280,7 +268,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   </div>
   <div class="row">
     <div class="seg" role="group" aria-label="View" id="viewSeg">
-      <button data-view="forus">For us</button><button data-view="week">Week</button><button data-view="day">Day</button><button data-view="month">Month</button><button data-view="list">List</button><button data-view="ours">Ours</button><button data-view="rhythms">Rhythms</button>
+      <button data-view="forus">For us</button><button data-view="day">Day</button><button data-view="list">List</button><button data-view="ours">Ours</button><button data-view="rhythms">Rhythms</button>
     </div>
     <div class="seg" role="group" aria-label="What to show" id="modeSeg">
       <button data-mode="picks" title="Events chosen by your newsletters">Picks</button><button data-mode="all" title="Everything listed">Everything</button>
@@ -399,7 +387,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 
   // ---------- state ----------
   const S = {
-    view: store.get('view2', 'forus'),
+    view: ['week', 'month'].includes(store.get('view2', 'forus')) ? 'forus' : store.get('view2', 'forus'),
     when: 'week', expanded: new Set(), showPassed: false,
     mode: store.get('mode', 'picks'),
     anchor: today(),
@@ -800,31 +788,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   function inWindow(d) { const w = S.index?.window; return !w || (d >= w.from && d <= w.to); }
 
   // ---------- views ----------
-  function viewWeek(from) {
-    const to = addDays(from, 6);
-    const { events, ongoing } = eventsIn(from, to);
-    const narrow = window.matchMedia('(max-width: 900px)').matches;
-    const wrap = el('div', { class: 'agenda' });
-    const ov = onView(ongoing); if (ov) wrap.append(ov);
-    const t = today();
-    if (narrow) { wrap.append(agendaDays(from, to, events, 'list')); return wrap; }
-    const grid = el('div', { class: 'week compact' });
-    for (let i = 0; i < 7; i++) {
-      const d = addDays(from, i);
-      const list = balance(events.filter(e => dayOf(e) === d && passes(e)));
-      const { shown, extra } = capList(list, CAP.week[S.mode]);
-      const col = el('div', { class: `day${d === t ? ' today' : ''}${d < t ? ' past' : ''}` },
-        el('div', { class: 'day-head' }, el('span', { class: 'dname', text: DOW[dow(d)] }), el('span', { class: 'dnum', text: `${shortDate(d)} · ${list.length}` })));
-      if (d < t && !list.length) col.append(el('div', { class: 'hint', text: 'Past' }));
-      else if (!inWindow(d)) col.append(el('div', { class: 'hint', text: 'No listings loaded for this date yet.' }));
-      else if (!list.length) col.append(el('div', { class: 'hint', text: S.mode === 'picks' ? 'No picks. Try Everything.' : 'Nothing matches.' }));
-      shown.forEach(e => col.append(stub(e)));
-      if (extra) col.append(el('button', { class: 'more-btn', onclick: () => { S.anchor = d; setView('day'); }, text: `+ ${extra.toLocaleString()} more · open day` }));
-      grid.append(col);
-    }
-    wrap.append(grid);
-    return wrap;
-  }
   function agendaDays(from, to, events, kind) {
     const box = el('div', { class: 'agenda' });
     const t = today(); let any = false;
@@ -877,25 +840,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (!list.length) wrap.append(emptyNote(S.mode === 'picks' ? 'No picks this day. Switch to Everything to see all listings.' : 'Nothing matches these filters.'));
     if (extra) wrap.append(el('div', { class: 'hint', text: `Showing the top ${shown.length} of ${list.length.toLocaleString()} by score. Narrow with search or filters to see the rest.` }));
     return wrap;
-  }
-  function viewMonth(anchor) {
-    const first = anchor.slice(0, 8) + '01';
-    const start = mondayOf(first);
-    const t = today();
-    const { events } = eventsIn(start, addDays(start, 41));
-    const byDay = new Map();
-    for (const e of balance(events.filter(e => passes(e)))) { const d = dayOf(e); (byDay.get(d) || byDay.set(d, []).get(d)).push(e); }
-    const grid = el('div', { class: 'month' }, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(n => el('div', { class: 'dow', text: n })));
-    for (let i = 0; i < 42; i++) {
-      const d = addDays(start, i);
-      if (i === 35 && d.slice(5, 7) !== first.slice(5, 7)) break;
-      const list = (byDay.get(d) || []).slice().sort(byScore);
-      const out = d.slice(5, 7) !== first.slice(5, 7) || !inWindow(d);
-      grid.append(el('button', { class: `cell${out ? ' out' : ''}${d === t ? ' today' : ''}`, onclick: () => { S.anchor = d; setView('day'); }, 'aria-label': `${dLabel(d)}: ${list.length} events` },
-        el('span', { class: 'n' }, el('b', { text: +d.slice(8) }), el('span', { text: inWindow(d) ? String(list.length) : '' })),
-        list.slice(0, 3).map(e => el('span', { class: `mini${e.pickedBy.length ? ' pick' : ''}` }, icon(e.category, true), el('span', { text: `${hhmm(e) ? clock(hhmm(e)) + ' ' : ''}${e.title}` })))));
-    }
-    return el('div', { class: 'agenda' }, grid, el('div', { class: 'hint', text: 'Each day shows its top three by score. Tap a day to see everything.' }));
   }
   /** Date range for a time preset. */
   function whenRange(w) {
@@ -1164,7 +1108,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   // ---------- frame ----------
   function rangeFor() {
     if (S.view === 'day') return [S.anchor, S.anchor];
-    if (S.view === 'month') { const f = S.anchor.slice(0, 8) + '01'; const s = mondayOf(f); return [s, addDays(s, 41)]; }
     const m = mondayOf(S.anchor); return [m, addDays(m, 6)];
   }
   function rangeLabel() {
@@ -1172,13 +1115,11 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (S.view === 'ours') return 'Your plans';
     if (S.view === 'rhythms') return 'Your rhythms';
     if (S.view === 'day') return dLabel(S.anchor) + (S.anchor === today() ? ' · Today' : '');
-    if (S.view === 'month') return `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+S.anchor.slice(5, 7) - 1]} ${S.anchor.slice(0, 4)}`;
     const m = mondayOf(S.anchor); const e = addDays(m, 6);
     return `${shortDate(m)} – ${shortDate(e)}`;
   }
   function step(dir) {
     if (S.view === 'day') S.anchor = addDays(S.anchor, dir);
-    else if (S.view === 'month') { const d = new Date(S.anchor.slice(0, 8) + '15T12:00:00Z'); d.setUTCMonth(d.getUTCMonth() + dir); S.anchor = d.toISOString().slice(0, 10); }
     else S.anchor = addDays(S.anchor, 7 * dir);
     render();
   }
@@ -1238,14 +1179,12 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       if (token !== renderToken) return;
     }
     let body;
-    if (S.view === 'week') body = viewWeek(mondayOf(S.anchor));
-    else if (S.view === 'list') body = viewList(mondayOf(S.anchor));
+    if (S.view === 'list') body = viewList(mondayOf(S.anchor));
     else if (S.view === 'day') body = viewDay(S.anchor);
-    else if (S.view === 'month') body = viewMonth(S.anchor);
     else if (S.view === 'rhythms') body = viewRhythms();
     else if (S.view === 'forus') body = viewForUs();
     else body = viewOurs();
-    const swipe = ['day', 'week', 'list', 'month', 'forus'].includes(S.view) ? el('div', { class: 'swipe-hint', text: S.view === 'forus' ? 'Swipe left or right to change the time window' : `Swipe left or right for the ${S.view === 'month' ? 'next month' : S.view === 'day' ? 'next day' : 'next week'}` }) : null;
+    const swipe = ['day', 'list', 'forus'].includes(S.view) ? el('div', { class: 'swipe-hint', text: S.view === 'forus' ? 'Swipe left or right to change the time window' : `Swipe left or right for the ${S.view === 'day' ? 'next day' : 'next week'}` }) : null;
     main.replaceChildren(...(swipe ? [swipe] : []), body, footer() || '');
   }
 
@@ -1295,7 +1234,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     touch = null;
     if (dt > 700 || Math.abs(dx) < 70 || Math.abs(dx) < 1.6 * Math.abs(dy)) return;
     const dir = dx < 0 ? 1 : -1;
-    if (['day', 'week', 'list', 'month'].includes(S.view)) { step(dir); window.scrollTo({ top: 0 }); return; }
+    if (['day', 'list'].includes(S.view)) { step(dir); window.scrollTo({ top: 0 }); return; }
     if (S.view === 'forus') {
       const order = ['week', 'tonight', 'tomorrow', 'weekend', 'nextweek'];
       S.when = order[(order.indexOf(S.when) + dir + order.length) % order.length];

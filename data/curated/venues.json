@@ -1,11 +1,17 @@
 {
-  "_about": "Small venues whose own schedules we read directly (fomo misses or under-covers them). type: 'ics' (a calendar feed URL) or 'squarespace' (a Squarespace events page; ?format=json is added). Their events count as 'Local venue' picks.",
+  "_about": "Small venues whose own schedules we read directly (fomo misses or under-covers them). type: 'ics' (a calendar feed URL) 'squarespace' (a Squarespace events page; ?format=json is added) or 'eventbrite' (an Eventbrite organizer page; each event page's schema.org data is read). Their events count as 'Local venue' picks.",
   "venues": [
     {
       "id": "lunatico",
       "type": "squarespace",
       "url": "https://www.barlunatico.com/calendar",
-      "venue": { "name": "LunÀtico", "address": "486 Halsey St, Brooklyn, NY 11233", "lat": 40.6831, "lng": -73.9347, "borough": "Brooklyn" },
+      "venue": {
+        "name": "LunÀtico",
+        "address": "486 Halsey St, Brooklyn, NY 11233",
+        "lat": 40.6831,
+        "lng": -73.9347,
+        "borough": "Brooklyn"
+      },
       "category": "music",
       "price": "$10 suggested cash donation",
       "skipTitles": "\\bclosed\\b",
@@ -15,9 +21,29 @@
       "id": "farm-one",
       "type": "ics",
       "url": "https://farm.one/events/list/?ical=1",
-      "venue": { "name": "Farm.One", "address": "625 Bergen St, Brooklyn, NY 11238", "lat": 40.679748, "lng": -73.968955, "borough": "Brooklyn" },
+      "venue": {
+        "name": "Farm.One",
+        "address": "625 Bergen St, Brooklyn, NY 11238",
+        "lat": 40.679748,
+        "lng": -73.968955,
+        "borough": "Brooklyn"
+      },
       "category": "community",
       "note": "Indoor hydroponic farm in Prospect Heights: tastings, workshops, trivia and bingo nights."
+    },
+    {
+      "id": "kvartira",
+      "type": "eventbrite",
+      "url": "https://www.eventbrite.com/o/kvartira-books-76426465393",
+      "venue": {
+        "name": "Kvartira Books",
+        "address": "731 Washington Ave, Brooklyn, NY 11238",
+        "lat": 40.6756,
+        "lng": -73.9631,
+        "borough": "Brooklyn"
+      },
+      "skipTitles": "storytime|время сказок|для детей|детей|дети|малыш|kids|children|читалочк|абвгд|курс по чтению|абонемент|кукольн",
+      "note": "Ukrainian, Russian and English bookshop in Prospect Heights (formerly MyBiblioteka): author talks, lectures and workshops, many in Russian."
     }
   ]
 }

@@ -2,6 +2,8 @@
  * Small local venues read from their own schedules (data/curated/venues.json):
  *  - 'ics': a calendar feed (e.g. WordPress "The Events Calendar" ?ical=1)
  *  - 'squarespace': a Squarespace events page, read as JSON with ?format=json (this month and next)
+ *  - 'eventbrite': an Eventbrite organizer page; each listed event page is read for its schema.org
+ *    Event data. (Eventbrite's JSON endpoints refuse us, so only the public pages are used.)
  * Their events are "Local venue" picks.
  */
 import { readFile } from 'node:fs/promises';
@@ -16,7 +18,7 @@ import type { Category, CollectResult, Event, RawEvent } from '../schema.ts';
 
 export interface LocalVenue {
   id: string;
-  type: 'ics' | 'squarespace';
+  type: 'ics' | 'squarespace' | 'eventbrite';
   url: string;
   venue: Event['venue'];
   category?: Category;
@@ -46,6 +48,51 @@ function make(v: LocalVenue, f: { title: string; date: string; time: string | nu
     tags: ['Local venue', v.id],
     ...(hide.length ? { hide } : {}),
   };
+}
+
+/** Event page links on an Eventbrite organizer page, de-duplicated by event id. */
+export function eventbriteLinks(html: string): string[] {
+  const byId = new Map<string, string>();
+  for (const m of html.matchAll(/https:\/\/www\.eventbrite\.com\/e\/([a-z0-9-]*?-?)(\d{9,})(?=[?"'\\])/gi)) {
+    if (!byId.has(m[2])) byId.set(m[2], `https://www.eventbrite.com/e/${m[1]}${m[2]}`);
+  }
+  return [...byId.values()];
+}
+
+interface LdOffer { price?: number | string; lowPrice?: number | string }
+interface LdEvent {
+  '@type'?: string | string[]; name?: string; description?: string; startDate?: string; endDate?: string; url?: string;
+  eventAttendanceMode?: string; location?: unknown; offers?: LdOffer | LdOffer[] | null;
+}
+
+/** One Eventbrite event page -> an event at this venue, or null (outside the window, elsewhere, online, or skipped). */
+export function parseEventbriteEvent(v: LocalVenue, html: string, pageUrl: string, from: string, to: string): RawEvent | null {
+  let ev: LdEvent | undefined;
+  for (const m of html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
+    try {
+      const d = JSON.parse(m[1]) as LdEvent;
+      if (/Event$/.test(String(d['@type'] ?? ''))) { ev = d; break; }
+    } catch { /* not JSON */ }
+  }
+  if (!ev?.startDate || !ev.name) return null;
+  if (/Online/i.test(ev.eventAttendanceMode ?? '')) return null;
+  const street = v.venue.address?.split(',')[0].toLowerCase();
+  const where = JSON.stringify(ev.location ?? '').toLowerCase();
+  if (street && !where.includes(street)) return null;
+  const title = clean(decodeEntities(ev.name));
+  if (v.skipTitles && new RegExp(v.skipTitles, 'i').test(title)) return null;
+  const date = ev.startDate.slice(0, 10);
+  if (date < from || date > to) return null; // a series lists only its first date; later ones are not guessed
+  const time = ev.startDate.length > 10 ? ev.startDate.slice(11, 16) : null;
+  const endTime = ev.endDate?.slice(0, 10) === date ? ev.endDate.slice(11, 16) : null;
+  const offer = Array.isArray(ev.offers) ? ev.offers[0] : ev.offers;
+  const low = offer ? Number(offer.lowPrice ?? offer.price) : NaN;
+  const priceText = Number.isFinite(low) ? (low === 0 ? 'Free (RSVP on Eventbrite)' : `From $${low.toFixed(2)} on Eventbrite`) : undefined;
+  const text = clean(decodeEntities(ev.description ?? ''));
+  const e = make(v, { title, date, time, endTime, url: safeUrl(ev.url) ?? pageUrl, text });
+  e.price = priceText ? { free: low === 0, text: priceText } : { free: null };
+  if ((title.match(/[\u0400-\u04FF]/g)?.length ?? 0) > title.length / 3) e.tags.push('Russian-language listing');
+  return e;
 }
 
 const textOf = (html?: string) => (html ? clean(cheerio.load(html).text()) : '');
@@ -88,6 +135,14 @@ export async function collectLocal(root: string, days = 28): Promise<CollectResu
       let got: RawEvent[];
       if (v.type === 'ics') {
         got = parseIcsVenue(v, await getText(v.url, { accept: 'text/calendar' }), from, to);
+      } else if (v.type === 'eventbrite') {
+        got = [];
+        for (const link of eventbriteLinks(await getText(v.url, { accept: 'text/html' })).slice(0, 40)) {
+          try {
+            const e = parseEventbriteEvent(v, await getText(link, { accept: 'text/html' }), link, from, to);
+            if (e) got.push(e);
+          } catch (err) { notes.push(`${v.id} skipped ${link}: ${(err as Error).message}`); }
+        }
       } else {
         // This month's page, plus next month's (?month=MM-YYYY), to cover the 4-week window.
         const items: SqItem[] = [];
