@@ -93,7 +93,7 @@ export function parseFomo(chunks: FomoChunk[], locations: Map<number, FomoLocati
 
       const loc = e.place_id != null ? locations.get(e.place_id) : undefined;
       const category = fomoCategory(e.event_type, e.tags);
-      const hide = fomoHide(e.event_type, e.tags, category);
+      const hide = fomoHide(e.event_type, e.tags, category, url, e.location ?? '', e.name);
       const base = {
         title: e.name.trim(),
         venue: {

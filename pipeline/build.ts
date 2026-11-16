@@ -170,7 +170,7 @@ export async function run(): Promise<void> {
   await writeFile(join(ROOT, 'dist', 'index.json'), JSON.stringify(index, null, 2));
 
   console.log(`\n${counts.collected} collected -> ${counts.afterDedupe} events (${counts.mergedDuplicates} duplicates merged, ${counts.invalidDropped} invalid dropped)`);
-  console.log(`picks ${counts.picks} | hidden by default: fitness ${counts.hiddenByDefault.fitness}, brand pop-ups ${counts.hiddenByDefault['brand-popup']} | transit tier 1 ${counts.transitTier1}, tier 2 ${counts.transitTier2}`);
+  console.log(`picks ${counts.picks} | hidden by default: ${Object.entries(counts.hiddenByDefault).map(([k, v]) => `${k} ${v}`).join(', ')} | transit tier 1 ${counts.transitTier1}, tier 2 ${counts.transitTier2}`);
   for (const w of weeks) console.log(`dist/${w.file}  ${w.events} events + ${w.ongoing} ongoing (+${w.hidden} hidden in ${w.hiddenFile})  ${(w.bytes / 1e6).toFixed(2)} MB`);
   const over = weeks.filter(w => w.bytes > 6e6); // ~1.5 MB gzipped on the wire
   if (over.length) console.warn(`WARNING: over the 6 MB budget: ${over.map(w => w.file).join(', ')}`);

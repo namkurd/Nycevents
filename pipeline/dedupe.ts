@@ -87,9 +87,9 @@ function merge(into: RawEvent, from: RawEvent): void {
   if (into.venue.lat == null && from.venue.lat != null) into.venue = { ...into.venue, lat: from.venue.lat, lng: from.venue.lng };
   if (vague(into.venue.name) && !vague(from.venue.name)) into.venue = { ...from.venue, ...(into.venue.lat != null ? { lat: into.venue.lat, lng: into.venue.lng } : {}) };
   if (into.allDay && !from.allDay) { into.start = from.start; into.end = from.end; into.allDay = false; }
-  // An editorial pick un-hides an event: if a newsletter chose it, it is not just a brand activation.
+  // An editorial pick un-hides an event: a newsletter's choice is not just a brand activation or a routine showtime.
   if (into.hide && from.pickedBy.length && !from.hide?.length) {
-    into.hide = into.hide.filter(h => h !== 'brand-popup');
+    into.hide = into.hide.filter(h => h !== 'brand-popup' && h !== 'chain-cinema');
     if (!into.hide.length) delete into.hide;
   }
 }

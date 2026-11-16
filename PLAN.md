@@ -82,7 +82,7 @@ type SourceId = 'fomo' | 'nycforfree' | 'skint' | 'cityhappenings' | 'readingthe
   | 'fieldnotes' | 'ohmyrockness' | 'thoughtgallery' | 'curated';
 ```
 
-**Hidden by default (owner's decision, Nov 16):** fitness classes and brand pop-ups. Each event carries `hide: ['fitness' | 'brand-popup']` when it falls in one of these groups. Rules live in `pipeline/categories.ts`: fomo `Fitness`/`Open Practice` types and fitness-tagged classes; fomo `Pop-Up` type and shopping tags; NYC for FREE brand categories (Fashion, Beauty, Food, Drink, Pet, Cars, Technology, Travel, NYFW); and titles with pop-up/shop/store/giveaway/sampling wording or "Brand X Brand" collaborations. A newsletter pick removes the brand-popup flag. The page shows each group behind its own toggle.
+**Hidden by default (owner's decisions, Nov 16):** fitness classes, brand pop-ups and chain cinema showtimes (Regal, AMC, iPic, Cinemark, Showcase, Look, Cinépolis; independent and repertory houses stay visible). Each event carries `hide: ['fitness' | 'brand-popup' | 'chain-cinema']` when it falls in one of these groups. Rules live in `pipeline/categories.ts`: fomo `Fitness`/`Open Practice` types and fitness-tagged classes; fomo `Pop-Up` type and shopping tags; NYC for FREE brand categories (Fashion, Beauty, Food, Drink, Pet, Cars, Technology, Travel, NYFW); titles with pop-up/shop/store/giveaway/sampling or activation wording (experience, takeover, wonderland, grand opening), consumer brand names, or "Brand X Brand" collaborations (brand names are checked on NYC for FREE titles only). A newsletter pick removes the brand-popup flag. The page shows each group behind its own toggle.
 
 **Week files (format 2)**, written by `build.ts`:
 - `dist/events-YYYY-Www.json`: shown events. `dist/events-YYYY-Www-hidden.json`: hidden-by-default events, loaded only when a group is toggled on.
@@ -175,11 +175,14 @@ Do them in order, and stop at each gate.
 *Gate M1:* `npm test` passes. `npm run pipeline` prints a count per source and writes week files under the 6 MB budget. Show the owner 20 random events with their source links to spot-check.
 
 ### M2 — Shared calendar page
-- [ ] Load the `artifact-design` and `artifact-capabilities` skills, then build `app/index.html`. Use FullCalendar (pinned) with week (default), day, month and list views; month cells show a count plus the top 3.
-- [ ] On view strip for ongoing items, a Picks/Everything toggle, filters (free, category, borough, time of day, source, "direct from home", search), "picked by" badges and a "direct" badge.
-- [ ] Event panel with Interested / Going / note, written to `marks/{userId}` in `db`. Show each person's initials via `user.profiles`. Add "Both interested" and "Ours" views.
-- [ ] Google Calendar link: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=…&dates=YYYYMMDDTHHMMSS/YYYYMMDDTHHMMSS&ctz=America/New_York&location=…&details=…`. Add a per-event .ics and an "Export Going" .ics through the `downloads` capability.
-- [ ] Publish with the Artifact tool, mapping `dist/*.json` through `files`. Show "last updated" per source, read from `index.json`.
+- [x] Load the `artifact-design` and `artifact-capabilities` skills, then build `app/index.html`. Use FullCalendar (pinned) with week (default), day, month and list views; month cells show a count plus the top 3.
+- [x] On view strip for ongoing items, a Picks/Everything toggle, filters (free, category, borough, time of day, source, "direct from home", search), "picked by" badges and a "direct" badge.
+- [x] Event panel with Interested / Going / note, written to `marks/{userId}` in `db`. Show each person's initials via `user.profiles`. Add "Both interested" and "Ours" views.
+- [x] Google Calendar link: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=…&dates=YYYYMMDDTHHMMSS/YYYYMMDDTHHMMSS&ctz=America/New_York&location=…&details=…`. Add a per-event .ics and an "Export Going" .ics through the `downloads` capability.
+    - Done differently: the `downloads` capability does not allow `.ics`. The page offers Google Calendar and Outlook links per event, and "Export Going (.csv)" in Google Calendar's import format. Apple Calendar waits for the M4 live feed.
+- [x] Publish with the Artifact tool, mapping `dist/*.json` through `files`. Show "last updated" per source, read from `index.json`.
+
+**Page:** https://claude.ai/artifact/7Gux5vJioAx6CaepNhEP9z (private; share from its Share menu with Contributor access or higher so marks can be saved). Built without FullCalendar: day columns of event cards read better than a time grid at this density, and each day column shows its top items by score with a "more" link into the Day view. Source: `app/index.html`; data files are `dist/*.json`, published beside it.
 
 *Gate M2:* using `ArtifactData`, list `marks` and confirm both people's docs exist after each has starred an event. The owner then shares the page from its Share menu.
 

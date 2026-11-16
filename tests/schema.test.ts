@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Event } from '../pipeline/schema.ts';
 import { parseClock, parseClockRange, nyIso, resolveMonthDay } from '../pipeline/lib/time.ts';
-import { fomoCategory, fomoHide, nffCategory } from '../pipeline/categories.ts';
+import { fomoCategory, fomoHide, isChainCinema, nffCategory } from '../pipeline/categories.ts';
 
 const valid = {
   id: 'abcdef012345',
@@ -67,6 +67,20 @@ describe('categories and hide rules', () => {
     expect(nffCategory('Community', 'REBEL Deal Bodega X Shopify').hide).toEqual(['brand-popup']);
     expect(nffCategory('Culture', 'Malcolm X Day Celebration').hide).toEqual([]);
     expect(nffCategory('Art', 'Ceramics 6 x 6 show').hide).toEqual([]);
+    for (const t of ['The Coca-Cola Holiday Truck', "Walmart's Holiday Wonderland", 'Stanley 1913 Museum of Adventure', 'Etsy Creative Chalet', "Bluey's Aussie Christmas", 'Peacock Pillow Fort', 'Burger Village Fresh Meadows Grand Opening'])
+      expect(nffCategory('Holiday', t).hide, t).toEqual(['brand-popup']);
+    for (const t of ['Madison Square Park Holiday Tree Lighting', "100th Macy's Thanksgiving Day Parade", 'Books & Bouquets Nov 18', 'Astronomy on Tap NYC: Sky News & Views!'])
+      expect(nffCategory('Holiday', t).hide, t).toEqual([]);
+  });
+  it('hides chain multiplex showtimes but not independent cinemas', () => {
+    expect(fomoHide('Screening', ['Film'], 'film', 'https://www.regmovies.com/movies/x', 'Regal Union Square')).toEqual(['chain-cinema']);
+    expect(fomoHide('Screening', ['Film'], 'film', 'https://www.amctheatres.com/movies/x', 'AMC Lincoln Square 13')).toEqual(['chain-cinema']);
+    expect(isChainCinema('https://filmforum.org/film/x', 'Film Forum')).toBe(false);
+    expect(isChainCinema('https://drafthouse.com/nyc/show/x', 'Alamo Drafthouse Cinema Brooklyn')).toBe(false);
+    expect(isChainCinema('https://www.metrograph.com/film/x', 'Metrograph')).toBe(false);
+    expect(fomoHide('Talk', ['Film'], 'talks', 'https://www.amctheatres.com/x', 'AMC 34th Street')).toEqual([]);
+    expect(fomoHide('Concert', ['Music'], 'music', 'https://example.org', 'Carnegie Hall', 'Max Richter: Sleep')).toEqual([]);
+    expect(fomoHide('Talk', ['Film'], 'talks', 'https://example.org', 'MoMI', 'Stanley Kubrick at 100')).toEqual([]);
   });
   it('maps fomo types and tags', () => {
     expect(fomoCategory('Screening', ['Film'])).toBe('film');

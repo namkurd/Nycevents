@@ -20,7 +20,7 @@ export const Category = z.enum(CATEGORIES);
 export type Category = z.infer<typeof Category>;
 
 /** Reasons an event is hidden unless the viewer turns the group back on. */
-export const HIDE_REASONS = ['fitness', 'brand-popup'] as const;
+export const HIDE_REASONS = ['fitness', 'brand-popup', 'chain-cinema'] as const;
 export const HideReason = z.enum(HIDE_REASONS);
 export type HideReason = z.infer<typeof HideReason>;
 

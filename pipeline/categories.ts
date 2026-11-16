@@ -48,8 +48,20 @@ export function fomoCategory(eventType: string, tags: string[]): Category {
   return 'other';
 }
 
-export function fomoHide(eventType: string, tags: string[], category: Category): HideReason[] {
+/** Multiplex chains whose regular showtimes are hidden by default (owner's decision, Nov 16).
+ *  Independent and repertory houses (Film Forum, Metrograph, IFC, Angelika, Alamo, Nitehawk…) stay visible. */
+const CHAIN_DOMAINS = /(^|\.)(regmovies\.com|amctheatres\.com|ipic\.com|cinemark\.com|showcasecinemas\.com|lookcinemas\.com|cinepolisusa\.com)$/i;
+const CHAIN_VENUE = /^(regal|amc|ipic|cinemark|showcase|look dine-in|cin[eé]polis)\b/i;
+
+export function isChainCinema(url: string, venue: string): boolean {
+  let host = '';
+  try { host = new URL(url).hostname; } catch { /* not a url */ }
+  return CHAIN_DOMAINS.test(host) || CHAIN_VENUE.test(venue.trim());
+}
+
+export function fomoHide(eventType: string, tags: string[], category: Category, url = '', venue = '', title = ''): HideReason[] {
   const out: HideReason[] = [];
+  if ((eventType === 'Screening' || category === 'film') && isChainCinema(url, venue)) out.push('chain-cinema');
   if (category === 'fitness') out.push('fitness');
   if (eventType === 'Pop-Up' || (eventType !== 'Market' && tags.some(x => POPUP_TAGS.has(x)))) out.push('brand-popup');
   return out;
@@ -78,11 +90,20 @@ const NFF: Record<string, [Category, boolean]> = {
 const BRAND_COLLAB = /(?<!Malcolm)\s[xX×]\s(?=[A-Z])/; // "Brand X Brand" collaborations
 const BRAND_TITLE = /\bpop[- ]?ups?\b|\bshop\b|\bstore\b|\bboutique\b|gift with purchase|\bgiveaways?\b|\bfree samples?\b|\bsampling\b|\bpost (?:&|and) tag\b|\bbrand week\b/i;
 
+/** Activation wording and consumer brands that mark a corporate pop-up rather than a cultural event.
+ *  Applied to NYC for FREE titles only; fomo's cultural listings would trip on names like these. */
+const ACTIVATION = /\b(experience|takeover|takes over|wonderland|chalet|grand opening|flagship|activation|pop-in|swag|merch drop|free (?:gift|gifts|tote|treats?|drinks?))\b/i;
+const BRANDS = /\b(coca-cola|pepsi|walmart|amazon|stanley|etsy|peacock|netflix|hulu|disney\+?|hbo max|paramount\+?|apple tv|prime video|bluey|tamagotchi|samsung|shopify|warby parker|spotify|nike|adidas|lego|sephora|ulta|uniqlo|ikea|starbucks|dunkin|red bull|heineken|bacardi|tito'?s|aperol|hennessy|verizon|t-mobile|at&t|bank of america|citibank|amex|american express|mastercard|uber eats|lyft|doordash|instacart|popmart|pop mart|skullpanda|labubu|harry potter shop|m&m'?s|hershey|oreo|crocs|lululemon|glossier|dyson|mcdonald'?s|chipotle|taco bell|wendy'?s|shake shack|krispy kreme|voodoo doughnut)\b/i;
+
+export function isBrandActivation(title: string): boolean {
+  return BRAND_TITLE.test(title) || BRAND_COLLAB.test(title) || ACTIVATION.test(title) || BRANDS.test(title);
+}
+
 export function nffCategory(label: string, title = ''): { category: Category; hide: HideReason[] } {
   const [category, popup] = NFF[label.trim()] ?? ['other', false];
   const hide: HideReason[] = [];
   if (category === 'fitness') hide.push('fitness');
-  if (popup || BRAND_TITLE.test(title) || BRAND_COLLAB.test(title)) hide.push('brand-popup');
+  if (popup || isBrandActivation(title)) hide.push('brand-popup');
   return { category, hide };
 }
 
