@@ -191,6 +191,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 .meter i { display: block; height: 100%; border-radius: 999px; }
 .rh-matches { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 250px); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; scrollbar-width: thin; }
 .rh-matches > * { scroll-snap-align: start; }
+.rh { content-visibility: auto; contain-intrinsic-size: auto 340px; }
 .rh-form { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-items: end; }
 .rh-form label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
 .rh-form input, .rh-form select { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 8px; font-size: 13px; color: var(--ink); min-width: 0; }
@@ -256,6 +257,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     <button class="chip" id="fFree" aria-pressed="false">Free</button>
     <button class="chip" id="fDirect" aria-pressed="false" title="Within a 5-minute walk of a stop on your home routes">Direct from home</button>
     <button class="chip" id="fBoth" aria-pressed="false">Both interested</button>
+    <button class="chip" id="fFollow" aria-pressed="false" title="Only venues you follow">Following</button>
     <select class="chip" id="fTod" aria-label="Time of day">
       <option value="any">Any time</option><option value="day">Daytime</option><option value="evening">After work (5&ndash;9pm)</option><option value="late">Late (9pm+)</option>
     </select>
@@ -317,10 +319,10 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     n.innerHTML = `<svg viewBox="0 0 24 24">${ICON_PATHS[k]}</svg>`;
     return n;
   }
-  const SOURCES = { repertory: 'Repertory special', fomo: 'fomo.nyc', nycforfree: 'NYC for FREE', skint: 'The Skint', cityhappenings: 'City Happenings', readingthecity: 'Reading the City', fieldnotes: 'field notes', ohmyrockness: 'Oh My Rockness', thoughtgallery: 'Thought Gallery', curated: 'Free museum night' };
-  const SHORT = { nycforfree: 'NYC4FREE', skint: 'Skint', cityhappenings: 'City Hap.', readingthecity: 'Reading', fieldnotes: 'Field notes', ohmyrockness: 'OMR', thoughtgallery: 'Thought G.', curated: 'Free night', repertory: 'Repertory' };
+  const SOURCES = { local: 'Local venue', repertory: 'Repertory special', fomo: 'fomo.nyc', nycforfree: 'NYC for FREE', skint: 'The Skint', cityhappenings: 'City Happenings', readingthecity: 'Reading the City', fieldnotes: 'field notes', ohmyrockness: 'Oh My Rockness', thoughtgallery: 'Thought Gallery', curated: 'Free museum night' };
+  const SHORT = { nycforfree: 'NYC4FREE', skint: 'Skint', cityhappenings: 'City Hap.', readingthecity: 'Reading', fieldnotes: 'Field notes', ohmyrockness: 'OMR', thoughtgallery: 'Thought G.', curated: 'Free night', repertory: 'Repertory', local: 'Local' };
   // Same weights as the pipeline: trusted curators 3, Thought Gallery and repertory specials 2, Oh My Rockness 1.
-  const PICK_W = { skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, ohmyrockness: 1 };
+  const PICK_W = { skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, local: 2, ohmyrockness: 1 };
   const HIDDEN = { fitness: 'Fitness classes', 'brand-popup': 'Brand pop-ups', 'chain-cinema': 'Chain cinema showtimes', 'library-program': 'Library classes & kids programs' };
   const ROUTE_COLORS = { '1': '#ee352e', '2': '#ee352e', '3': '#ee352e', '4': '#00933c', '5': '#00933c', '6': '#00933c', '7': '#b933ad', A: '#0039a6', C: '#0039a6', E: '#0039a6', B: '#ff6319', D: '#ff6319', F: '#ff6319', M: '#ff6319', G: '#6cbe45', J: '#996633', Z: '#996633', L: '#a7a9ac', N: '#fccc0a', Q: '#fccc0a', R: '#fccc0a', W: '#fccc0a', S: '#808183', FS: '#808183', GS: '#808183', H: '#808183' };
   const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -363,12 +365,12 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     when: 'week', expanded: new Set(), showPassed: false,
     mode: store.get('mode', 'picks'),
     anchor: today(),
-    f: { free: false, direct: false, both: false, tod: 'any', boro: '', q: '', rhythm: '', cats: new Set(store.get('cats', [])) },
+    f: { free: false, direct: false, both: false, following: false, tod: 'any', boro: '', q: '', rhythm: '', cats: new Set(store.get('cats', [])) },
     showHidden: { fitness: false, 'brand-popup': false, 'chain-cinema': false, 'library-program': false, ...store.get('showHidden', {}) },
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
     rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
-    home: null,
+    home: null, follow: {},
   };
 
   // ---------- data ----------
@@ -436,13 +438,17 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       S.marks = next; S.dbReady = true;
       refreshPeople(); render();
     }, err => { console.warn('marks subscription ended', err); });
+    db.doc('prefs/venues').onSnapshot(snap => {
+      S.follow = snap.exists ? { ...(snap.data().follow || {}) } : {}; scoreMemo.clear(); render();
+      if (openId) { const e = findEvent(openId); if (e) openDrawer(e); }
+    }, err => console.warn('follow subscription ended', err));
     db.doc('home/config').onSnapshot(snap => {
       S.home = snap.exists ? snap.data() : null; transitCache.clear(); render();
     }, err => console.warn('home subscription ended', err));
     db.doc('rhythms/list').onSnapshot(snap => {
       S.rhythmsExists = snap.exists;
       const d = snap.exists ? snap.data() : {};
-      if (!rPending) S.rhythms = { items: { ...(d.items || {}) }, log: { ...(d.log || {}) } };
+      if (!rPending) { S.rhythms = { items: { ...(d.items || {}) }, log: { ...(d.log || {}) } }; rVersion++; }
       render();
     }, err => console.warn('rhythms subscription ended', err));
     refreshPeople();
@@ -492,6 +498,12 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     }, 450);
   }
 
+  // ---------- per-render caches (the Rhythms and For us views score thousands of events) ----------
+  let epoch = 0;                         // bumped at the start of every render
+  let rVersion = 0;                      // bumped whenever rhythms change
+  const scoreMemo = new Map();           // event -> effScore, this render
+  const hayOf = e => e._hay || (e._hay = `${e.title} ${e.venue?.name || ''} ${(e.tags || []).join(' ')} ${e.description || ''}`.toLowerCase());
+
   // ---------- transit from home (computed here; home lives only in the page's private database) ----------
   const transitCache = new Map();
   const metres = (aLat, aLng, bLat, bLng) => {
@@ -534,7 +546,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   // Status follows the owner's sheet: Greenin (< 75% of the goal), Coolin (75-100%), Overdue (past the goal).
   const RSTATE = { overdue: 'Overdue', coolin: 'Coolin', greenin: 'Greenin' };
   const daysBetween = (a, b) => Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 864e5);
-  const rItems = () => Object.entries(S.rhythms.items || {}).filter(([, r]) => r && !r.archived).map(([id, r]) => ({ id, ...r }));
+  let rItemsCache = null, rItemsVer = -1;
+  const rItems = () => {
+    if (rItemsVer !== rVersion) {
+      rItemsCache = Object.entries(S.rhythms.items || {}).filter(([, r]) => r && !r.archived).map(([id, r]) => ({ id, ...r, _words: (r.words || []).map(w => w.toLowerCase().trim()).filter(Boolean) }));
+      rItemsVer = rVersion;
+    }
+    return rItemsCache;
+  };
   function rStatus(r, onDate = today()) {
     if (!r.last) return { state: 'overdue', ratio: 9, since: null, dueIn: -999 };
     const since = Math.max(0, daysBetween(r.last, onDate));
@@ -544,17 +563,23 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   }
   const rOrder = (a, b) => rStatus(b).ratio - rStatus(a).ratio || a.name.localeCompare(b.name);
   function rMatches(r, e) {
-    const cats = r.cats || []; const words = (r.words || []).map(w => w.toLowerCase().trim()).filter(Boolean);
+    const cats = r.cats || []; const words = r._words || (r.words || []).map(w => w.toLowerCase().trim()).filter(Boolean);
     if (!cats.length && !words.length) return false;
-    const catOk = !cats.length || cats.includes(e.category);
-    if (!catOk) return false;
+    if (cats.length && !cats.includes(e.category)) return false;
     if (!words.length) return true;
-    const hay = `${e.title} ${e.venue?.name || ''} ${(e.tags || []).join(' ')} ${e.description || ''}`.toLowerCase();
+    const hay = hayOf(e);
     return words.some(w => hay.includes(w));
   }
-  const eventRhythms = e => rItems().filter(r => rMatches(r, e));
+  const eventRhythms = e => {
+    if (e._rhVer !== rVersion) { e._rh = rItems().filter(r => rMatches(r, e)); e._rhVer = rVersion; }
+    return e._rh;
+  };
   /** Score nudge from rhythms, judged on the event's own date: demote right after doing it, lift as it comes due. */
   function rBoost(e) {
+    if (e._rbEpoch === epoch) return e._rb;
+    e._rbEpoch = epoch; e._rb = rBoostRaw(e); return e._rb;
+  }
+  function rBoostRaw(e) {
     const rs = eventRhythms(e); if (!rs.length) return 0;
     const day = e.ongoing ? today() : dayOf(e);
     let best = -Infinity;
@@ -565,7 +590,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     }
     return best;
   }
-  const effScore = e => (e.score || 0) + rBoost(e) + homeBonus(e) - passPenalty(e);
+  const effScore = e => { let v = scoreMemo.get(e); if (v === undefined) { v = (e.score || 0) + rBoost(e) + homeBonus(e) - passPenalty(e) + (isFollowed(e) ? 2 : 0); scoreMemo.set(e, v); } return v; };
   const fmtDays = n => `${n} day${n === 1 ? '' : 's'}`;
   function rLabel(r) {
     const st = rStatus(r);
@@ -579,6 +604,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     // Optimistic local merge, then one write at a time.
     for (const [k, v] of Object.entries(patch.items || {})) S.rhythms.items[k] = { ...(S.rhythms.items[k] || {}), ...v };
     for (const [k, v] of Object.entries(patch.log || {})) S.rhythms.log[k] = v;
+    rVersion++;
     rPending++; render(); if (openId) { const e = findEvent(openId); if (e) openDrawer(e); }
     writeChain = writeChain.then(() => (S.rhythmsExists ? db.doc('rhythms/list').update(patch) : db.doc('rhythms/list').set({ items: S.rhythms.items, log: S.rhythms.log })))
       .then(() => { S.rhythmsExists = true; })
@@ -590,6 +616,17 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const key = `${date}_${r.id}_${Date.now().toString(36)}`;
     rWrite({ items: { [r.id]: { last } }, log: { [key]: { rid: r.id, date, title: ev ? ev.title : r.name, eventId: ev ? ev.id : null, by: S.me || null } } });
     toast(`Logged ${r.name} on ${shortDate(date)}.`);
+  }
+
+  // ---------- followed venues (shared between you two, stored in the page's database) ----------
+  const isFollowed = e => !!S.follow[e.venue?.name];
+  async function toggleFollow(e) {
+    if (!db || !S.canWrite) { toast('Following is view-only for you on this page.'); return; }
+    const name = e.venue?.name; if (!name || /^see listing$/i.test(name)) return;
+    const on = !S.follow[name];
+    S.follow = { ...S.follow, [name]: on ? true : false }; scoreMemo.clear(); render(); openDrawer(e);
+    writeChain = writeChain.then(() => db.doc('prefs/venues').set({ follow: S.follow })).catch(err => { console.warn(err); toast('Could not save that. Try again.'); });
+    toast(on ? `Following ${name}. Its events will rank higher.` : `Stopped following ${name}.`);
   }
 
   // ---------- picks balance, "Not for us", travel time ----------
@@ -606,15 +643,20 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     return list.filter(e => !isLightPick(e) || keep.has(e) || isMarked(e.id));
   }
   /** Similar to something either of you passed on: same venue, or two shared title words. */
+  let passIndex = null;
   function passPenalty(e) {
-    const passed = []; for (const doc of Object.values(S.marks)) for (const m of Object.values(doc.events || {})) if (m.s === 'pass') passed.push(m);
-    if (!passed.length) return 0;
-    const tk = new Set(e.title.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3));
-    let p = 0;
-    for (const m of passed) {
-      if (m.v && m.v === e.venue?.name) p = Math.max(p, 1);
-      const shared = (m.t || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3 && tk.has(w)).length;
-      if (shared >= 2) p = Math.max(p, 1.5);
+    if (!passIndex) {
+      passIndex = { venues: new Set(), titles: [] };
+      for (const doc of Object.values(S.marks)) for (const m of Object.values(doc.events || {})) if (m.s === 'pass') {
+        if (m.v) passIndex.venues.add(m.v);
+        passIndex.titles.push((m.t || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3));
+      }
+    }
+    if (!passIndex.venues.size && !passIndex.titles.length) return 0;
+    let p = passIndex.venues.has(e.venue?.name) ? 1 : 0;
+    if (passIndex.titles.length) {
+      const tk = new Set(e.title.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3));
+      for (const t of passIndex.titles) if (t.filter(w => tk.has(w)).length >= 2) { p = 1.5; break; }
     }
     return p;
   }
@@ -640,12 +682,13 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const marked = isMarked(e.id);
     if (e.hide && e.hide.length && !e.hide.some(h => S.showHidden[h]) && !marked) return false;
     if (!S.showPassed && isPassed(e.id)) return false;
-    if (!opts.ignoreMode && !S.f.rhythm && S.mode === 'picks' && !e.pickedBy.length && !marked) return false;
+    if (!opts.ignoreMode && !S.f.rhythm && S.mode === 'picks' && !e.pickedBy.length && !marked && !isFollowed(e)) return false;
     if (S.f.rhythm) { const r = S.rhythms.items[S.f.rhythm]; if (!r || !rMatches(r, e)) return false; }
     const f = S.f;
     if (f.free && !(e.price && e.price.free)) return false;
     if (f.direct && !transitOf(e)) return false;
     if (f.both && !bothInterested(e.id)) return false;
+    if (f.following && !isFollowed(e)) return false;
     if (f.boro && e.venue.borough !== f.boro) return false;
     if (f.cats.size && !f.cats.has(e.category)) return false;
     if (f.tod !== 'any') {
@@ -677,6 +720,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   }
   function badges(e, { full } = {}) {
     const b = [];
+    if (isFollowed(e)) b.push(el('span', { class: 'tag pickedby', style: 'background:color-mix(in srgb, var(--c-community) 16%, transparent);color:var(--c-community)', title: 'A venue you follow', text: '★ Following' }));
     for (const p of e.pickedBy) b.push(el('span', { class: 'tag pickedby', title: `Picked by ${SOURCES[p] || p}`, text: SHORT[p] || p }));
     if (e.price && e.price.free) b.push(el('span', { class: 'tag free', text: 'Free' }));
     if (e.rsvp) b.push(el('span', { class: 'tag', text: 'RSVP' }));
@@ -717,9 +761,10 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const active = S.f.rhythm ? S.rhythms.items[S.f.rhythm] : null;
     if (!due.length && !active) return null;
     const bar = el('div', { class: 'due' }, el('span', { class: 'lbl', text: 'Due for' }));
+    const pool = events.filter(e => passes(e, { ignoreMode: true }));
     for (const r of due) {
       const st = rStatus(r);
-      const n = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true }) ).length;
+      const n = pool.filter(e => rMatches(r, e)).length;
       bar.append(el('button', { class: `pill ${st.state}`, 'aria-pressed': String(S.f.rhythm === r.id), title: `${rLabel(r)}. Show matching events.`, onclick: () => { S.f.rhythm = S.f.rhythm === r.id ? '' : r.id; render(); } }, `${r.name} · ${n}`));
     }
     if (active) bar.append(el('button', { class: 'more-btn', onclick: () => { S.f.rhythm = ''; render(); }, text: `Clear "${active.name}"` }));
@@ -851,7 +896,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   /** "For us": picks, overdue rhythms, easy trips and your marks, blended and ranked. */
   function forUsCandidate(e) {
     if (!passes(e, { ignoreMode: true })) return false;
-    if (e.pickedBy.length > 0 || isMarked(e.id)) return true;
+    if (e.pickedBy.length > 0 || isMarked(e.id) || isFollowed(e)) return true;
     // Rhythm-only suggestions must also be practical: free, or a direct trip from home.
     return rBoost(e) >= 1 && (!!transitOf(e) || !!e.price?.free) && (rBoost(e) >= 2 || !!transitOf(e));
   }
@@ -936,7 +981,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     wrap.append(head, el('div', { class: 'hint', text: 'How often you want to do each kind of thing. Logging one pushes similar events down the calendar, then they climb back as the next date comes due.' }));
     if (!db) wrap.append(emptyNote('Rhythms are saved on claude.ai; open the published page to use them.'));
     if (S.editing === 'new') wrap.append(rForm(null));
-    const { events } = eventsIn(today(), addDays(today(), 31));
+    const { events: all31 } = eventsIn(today(), addDays(today(), 31));
+    const events = all31.filter(e => passes(e, { ignoreMode: true })); // once, not once per rhythm
     const list = el('div', { class: 'rh-list' });
     for (const r of items) {
       const st = rStatus(r);
@@ -955,7 +1001,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       if (S.editing === r.id) card.append(rForm(r));
       if (st.state !== 'greenin') {
         // Best few per day for the next month, in date order, so the strip scrolls through time.
-        const all = events.filter(e => rMatches(r, e) && passes(e, { ignoreMode: true }));
+        const all = events.filter(e => rMatches(r, e));
         const perDay = new Map();
         for (const e of all.sort(byScore)) { const d = dayOf(e); const l = perDay.get(d) || perDay.set(d, []).get(d); if (l.length < 3) l.push(e); }
         const m = [...perDay.values()].flat().sort((a, b) => a.start.localeCompare(b.start)).slice(0, 60);
@@ -1060,7 +1106,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       el('h2', { text: e.title }),
       el('div', { class: 'when', text: when }),
       el('div', { class: 'meta' },
-        el('div', {}, el('strong', { text: e.venue.name }), e.venue.address ? ` · ${e.venue.address}` : '', e.venue.borough ? ` · ${e.venue.borough}` : ''),
+        el('div', { class: 'row' }, el('span', {}, el('strong', { text: e.venue.name }), e.venue.address ? ` · ${e.venue.address}` : '', e.venue.borough ? ` · ${e.venue.borough}` : ''),
+          S.canWrite && db && !/^see listing$/i.test(e.venue.name) ? el('button', { class: 'btn', 'aria-pressed': String(isFollowed(e)), onclick: () => toggleFollow(e), text: isFollowed(e) ? '★ Following' : '☆ Follow venue' }) : null),
         transitOf(e) ? el('div', { class: 'badges row' }, `${travelText(e)} from home · direct:`, transitOf(e).routes.map(routeBullet), el('span', { text: `(stop ${transitOf(e).walkM} m from the venue)` })) : (homeKmOf(e) != null ? el('div', { text: `${travelText(e)} from home (${homeKmOf(e)} km; estimate)` }) : null),
         e.price?.text || e.price?.free ? el('div', { text: e.price.text || 'Free' }) : null,
         e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', e.pickedBy.map(p => el('span', { class: 'tag pickedby', text: SOURCES[p] || p }))) : null,
@@ -1116,6 +1163,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     $('#fFree').setAttribute('aria-pressed', String(S.f.free));
     $('#fDirect').setAttribute('aria-pressed', String(S.f.direct));
     $('#fBoth').setAttribute('aria-pressed', String(S.f.both));
+    $('#fFollow').setAttribute('aria-pressed', String(S.f.following));
     $('#catSummary').textContent = S.f.cats.size ? `Categories · ${S.f.cats.size}` : 'Categories';
     const nHidden = Object.values(S.showHidden).filter(Boolean).length;
     $('#hiddenSummary').textContent = nHidden ? `Hidden groups · ${nHidden} shown` : 'Hidden groups';
@@ -1137,6 +1185,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   }
   let renderToken = 0;
   async function render() {
+    epoch++; scoreMemo.clear(); passIndex = null;
     syncControls();
     const token = ++renderToken;
     const main = $('#main');
@@ -1191,6 +1240,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   $('#fFree').onclick = () => { S.f.free = !S.f.free; render(); };
   $('#fDirect').onclick = () => { S.f.direct = !S.f.direct; render(); };
   $('#fBoth').onclick = () => { S.f.both = !S.f.both; render(); };
+  $('#fFollow').onclick = () => { S.f.following = !S.f.following; render(); };
   $('#fTod').onchange = ev => { S.f.tod = ev.target.value; render(); };
   $('#fBoro').onchange = ev => { S.f.boro = ev.target.value; render(); };
   let qTimer; $('#q').addEventListener('input', ev => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.f.q = ev.target.value.trim().toLowerCase(); render(); }, 180); });

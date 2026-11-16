@@ -5,6 +5,8 @@ import { collectSkint } from '../collectors/skint.ts';
 import { collectSubstack } from '../collectors/substack.ts';
 import { collectOhMyRockness } from '../collectors/ohmyrockness.ts';
 import { collectThoughtGallery } from '../collectors/thoughtgallery.ts';
+import { collectLocal } from '../collectors/local.ts';
+import { collectCurated } from '../collectors/curated.ts';
 
 const source = process.argv.find(a => a.startsWith('--source='))?.split('=')[1];
 const fns: Record<string, () => Promise<{ events: { start: string; title: string; venue: { name: string } }[]; unparsed?: unknown[]; notes?: string[] }>> = {
@@ -16,6 +18,8 @@ const fns: Record<string, () => Promise<{ events: { start: string; title: string
   readingthecity: () => collectSubstack(process.cwd(), 'readingthecity'),
   ohmyrockness: () => collectOhMyRockness(process.cwd()),
   thoughtgallery: () => collectThoughtGallery(process.cwd()),
+  local: () => collectLocal(process.cwd()),
+  curated: () => collectCurated(process.cwd()),
 };
 if (!source || !fns[source]) {
   console.error(`usage: npm run collect -- --source=${Object.keys(fns).join('|')}`);

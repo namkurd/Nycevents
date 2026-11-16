@@ -2,14 +2,14 @@ import { z } from 'zod';
 
 export const SOURCE_IDS = [
   'fomo', 'nycforfree', 'skint', 'cityhappenings', 'readingthecity',
-  'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory',
+  'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory', 'local',
 ] as const;
 export const SourceId = z.enum(SOURCE_IDS);
 export type SourceId = z.infer<typeof SourceId>;
 
 /** Sources whose inclusion of an event counts as an editorial pick. */
 export const PICK_SOURCES: SourceId[] = [
-  'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory',
+  'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory', 'local',
 ];
 
 /**
@@ -18,7 +18,7 @@ export const PICK_SOURCES: SourceId[] = [
  * does not crowd out everything else (owner's request, Nov 16).
  */
 export const PICK_WEIGHTS: Partial<Record<SourceId, number>> = {
-  skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, ohmyrockness: 1,
+  skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, local: 2, ohmyrockness: 1,
 };
 
 export const CATEGORIES = [

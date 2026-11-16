@@ -1,0 +1,23 @@
+{
+  "_about": "Small venues whose own schedules we read directly (fomo misses or under-covers them). type: 'ics' (a calendar feed URL) or 'squarespace' (a Squarespace events page; ?format=json is added). Their events count as 'Local venue' picks.",
+  "venues": [
+    {
+      "id": "lunatico",
+      "type": "squarespace",
+      "url": "https://www.barlunatico.com/calendar",
+      "venue": { "name": "LunÀtico", "address": "486 Halsey St, Brooklyn, NY 11233", "lat": 40.6831, "lng": -73.9347, "borough": "Brooklyn" },
+      "category": "music",
+      "price": "$10 suggested cash donation",
+      "skipTitles": "\\bclosed\\b",
+      "note": "Live music nightly from 9pm, two sets."
+    },
+    {
+      "id": "farm-one",
+      "type": "ics",
+      "url": "https://farm.one/events/list/?ical=1",
+      "venue": { "name": "Farm.One", "address": "625 Bergen St, Brooklyn, NY 11238", "lat": 40.679748, "lng": -73.968955, "borough": "Brooklyn" },
+      "category": "community",
+      "note": "Indoor hydroponic farm in Prospect Heights: tastings, workshops, trivia and bingo nights."
+    }
+  ]
+}

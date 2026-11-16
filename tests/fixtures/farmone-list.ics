@@ -1,0 +1,423 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Farm.One - ECPv6.18.4//NONSGML v1.0//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Farm.One
+X-ORIGINAL-URL:https://farm.one
+X-WR-CALDESC:Events for Farm.One
+REFRESH-INTERVAL;VALUE=DURATION:PT1H
+X-Robots-Tag:noindex
+X-PUBLISHED-TTL:PT1H
+BEGIN:VTIMEZONE
+TZID:America/New_York
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:20250309T070000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:20251102T060000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:20260308T070000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:20261101T060000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:20270314T070000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:20271107T060000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:20280312T070000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:20281105T060000
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261117T190000
+DTEND;TZID=America/New_York:20261117T210000
+DTSTAMP:20260616T213932Z
+CREATED:20251230T192533Z
+LAST-MODIFIED:20260616T213932Z
+UID:10000527-1794942000-1794949200@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night-2/2026-11-17/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261119T190000
+DTEND;TZID=America/New_York:20261119T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000181-1795114800-1795122000@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-11-19/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261126T190000
+DTEND;TZID=America/New_York:20261126T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000182-1795719600-1795726800@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-11-26/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261201T190000
+DTEND;TZID=America/New_York:20261201T210000
+DTSTAMP:20251230T192013Z
+CREATED:20251230T192013Z
+LAST-MODIFIED:20251230T192013Z
+UID:10000408-1796151600-1796158800@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night/2026-12-01/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261202T200000
+DTEND;TZID=America/New_York:20261202T220000
+DTSTAMP:20261106T182549Z
+CREATED:20261106T182549Z
+LAST-MODIFIED:20261106T182549Z
+UID:10000716-1796241600-1796248800@farm.one
+SUMMARY:Written in Brooklyn Storytelling Series presents Goodbyes & Hellos
+DESCRIPTION:From breaking ties to new adventures. Grab a drink and enjoy true stories about moving on and starting over. \n\n\n\n\nWelcom to the Written in Brooklyn Storytelling Series! A night of true stories that will make you feel so much better about your own life. \nThis month’s theme is Goodbyes & Hellos. Throw on something cute\, grab a cocktail\, and settle in for a night of wild tales about leaving the old\, welcoming the new\, and the humor that comes with the hardship. We’ve got it all at the Written in Brooklyn Storytelling Series. \nDecember 2nd at Farm.One. \nDoors 7. Show 8pm. \nWe’ll have very good pizza by Pizza Party so come early\, grab a good seat and a slice! \nWe love your pet\, but please no dogs. Service animals welcome! \nSee you there!
+URL:https://farm.one/event/written-in-brooklyn-storytelling-series-presents-goodbyes-hellos/
+ATTACH;FMTTYPE=image/jpeg:https://farm.one/wp-content/uploads/2026/11/wib-poster-dec-2026.jpg
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261203T190000
+DTEND;TZID=America/New_York:20261203T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000183-1796324400-1796331600@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-12-03/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261210T190000
+DTEND;TZID=America/New_York:20261210T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000184-1796929200-1796936400@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-12-10/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261211T200000
+DTEND;TZID=America/New_York:20261211T220000
+DTSTAMP:20261110T185229Z
+CREATED:20261110T185042Z
+LAST-MODIFIED:20261110T185229Z
+UID:10000717-1797019200-1797026400@farm.one
+SUMMARY:Burlesque at Farm.One
+DESCRIPTION:Join us for Tassels to Table. \nFarm.One’s back lounge is going full cabaret on December 11th at 8pm for an intimate burlesque experience you won’t find anywhere else in Brooklyn. Hosted by the fabulous Maine Attraction\, this evening features four stunning performers — KingQueen\, Logan L’Enfer\, Nirah\, and Pete ZaParty — plus a special menu from Pizza Party. Wash it all down with any of the delicious Farm.One house made beers or specialty cocktails. \nThis is a seated\, curated night for a small crowd. Tickets go fast and the room is small on purpose 👀 \nAll seated tickets include a short pour & a bite. Doors at 8pm. Back lounge only. 21+. \n📍 625 Bergen Street\, Brooklyn\, NY 11217
+URL:https://farm.one/event/burlesque-at-farm-one-3/
+ATTACH;FMTTYPE=image/jpeg:https://farm.one/wp-content/uploads/2026/11/IMG_8186.jpeg
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261213T160000
+DTEND;TZID=America/New_York:20261213T190000
+DTSTAMP:20261116T193107Z
+CREATED:20261116T193107Z
+LAST-MODIFIED:20261116T193107Z
+UID:10000718-1797177600-1797188400@farm.one
+SUMMARY:Consumption Book Club: Ruins\, Child
+DESCRIPTION:From the hosts: \n​A gathering celebrating preservation\, communal care\, and what it means to “be rooted” through a group meal\, pickle making workshop\, and writing practices inspired by Giada Scodellaro’s award winning debut novel Ruins\, Child.\n​“It is sinking a little\, but then everything is going down\, so today we tell ourselves it is fine\, and just the same there is The Holiday\, or there is an urge to preserve something.” Scodellaro\, Ruins\, Child. \n​ \n​In a time of so much rapid change\, what does it mean to be rooted? For many of us living in close proximity to one another within this city\, the feeling of overwhelm can lead us to disconnect from the faces that surround us and the spaces that hold us. Now it’s more important than ever to remember who and what came before us\, and to look for ways that we can preserve their memories that are at risk of being paved over. \n​ \n​In Giada Scodellaro’s debut novel Ruins\, Child\, the story serves as a living archive of communal care\, navigating memory\, change\, and grief through celebration\, ritual\, and collective witnessing. Central to this novel are seven women living within a large\, derelict apartment complex. Though the concrete they walk on is cracked and crumbling\, and the once tamed gardens are overgrown and wild\, the entire community living within the walls take endless action to hold themselves together. The collaged narrative comes together in hours of footage\, recordings\, and writings captured by the women throughout time and witnessed by the community as an act of celebration of their endless tradition known as “The Holiday.” \n​ \n​Join us on December 13th from 4-7pm where we’ll be celebrating this novel and considering the theme of “Preservation\,” engaging in conversations and activities that allow us to reflect on the ways that we tend to each other and the environments we inhabit. In the beautiful space of Farm.One\, a vertical urban farm in Brooklyn\, we will feed our urge to preserve through a communal meal inspired by the book\, a pickle making workshop led by sustainable chef\, Lilli Gluck of Dilli by Lilli\, and creating our own celebratory archives through collages of writing\, illustration\, image\, and more. We hope participants gain a more grounded perspective on the way we each engage with the communities and environments that sustain us\, and seek further creative ways that we can protect and preserve them in response. \n​ \n​To directly support our communities in urgent need\, a portion of the proceeds of all of our online zine sales this month (November 13th-December 31st) will be donated to emergency relief funds helping the victims of the Flatbush building collapse that occurred on November 12th. 75% of the Ruins\, Child zine will go towards these funds\, as well as 50% of all previous zines. \n​ \n​Tickets for entry\, meal + bar drink\, and the pickle workshop start at $20. Should you like your ticket to include a copy of our next zine and for a portion to be donated\, please select the $35 option. 5 additional zero-cost tickets are reserved for lower income participants. Please reach out to us at consumptionbookclub@gmail.com to request one of these tickets. \n​ \n​Zines will be available for purchase at the event. The menu will be vegetarian and gluten-free friendly. Non-alcoholic options will be included.
+URL:https://farm.one/event/consumption-book-club-ruins-child/
+ATTACH;FMTTYPE=image/avif:https://farm.one/wp-content/uploads/2026/11/ee922950-3341-4ee1-a218-1bf560a91c5f.avif
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261215T190000
+DTEND;TZID=America/New_York:20261215T210000
+DTSTAMP:20260616T213932Z
+CREATED:20251230T192533Z
+LAST-MODIFIED:20260616T213932Z
+UID:10000528-1797361200-1797368400@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night-2/2026-12-15/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261217T190000
+DTEND;TZID=America/New_York:20261217T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000185-1797534000-1797541200@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-12-17/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261218T180000
+DTEND;TZID=America/New_York:20261218T210000
+DTSTAMP:20261111T153041Z
+CREATED:20261022T141622Z
+LAST-MODIFIED:20261111T153041Z
+UID:10000713-1797616800-1797627600@farm.one
+SUMMARY:Christmas Classic Ping Pong Tournament
+DESCRIPTION:Farm.One is hosting our third annual Christmas Classic Ping Pong Tournament! \n​Come hang at the farm and compete for prize money\, but more importantly: bragging rights. \n​Entry Fee: $20 (Includes 1 Draft Beer) \n​First Place: $140 & Special Gift \n​Second Place: Entry Fee Back \n​Note: This is not for the faint of heart. This tournament is for non-professional players who dominate the rec room or community leagues! Format will depend on total sign ups (as of now\, capped at 24 participants)\, but the semis and final will be BEST 2 out of 3. There will be room for spectators\, so bring your friends! \n​Farm.One will provide paddles\, but you are welcome to bring your own.
+URL:https://farm.one/event/christmas-classic-ping-pong-tournament-3/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2026/10/1-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261224T190000
+DTEND;TZID=America/New_York:20261224T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000186-1798138800-1798146000@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-12-24/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261231T190000
+DTEND;TZID=America/New_York:20261231T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000187-1798743600-1798750800@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2026-12-31/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270105T190000
+DTEND;TZID=America/New_York:20270105T210000
+DTSTAMP:20251230T192013Z
+CREATED:20251230T192013Z
+LAST-MODIFIED:20251230T192013Z
+UID:10000409-1799175600-1799182800@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night/2027-01-05/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270107T190000
+DTEND;TZID=America/New_York:20270107T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000188-1799348400-1799355600@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-01-07/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270114T190000
+DTEND;TZID=America/New_York:20270114T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000189-1799953200-1799960400@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-01-14/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270119T190000
+DTEND;TZID=America/New_York:20270119T210000
+DTSTAMP:20260616T213932Z
+CREATED:20251230T192533Z
+LAST-MODIFIED:20260616T213932Z
+UID:10000529-1800385200-1800392400@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night-2/2027-01-19/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270121T190000
+DTEND;TZID=America/New_York:20270121T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000190-1800558000-1800565200@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-01-21/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270128T190000
+DTEND;TZID=America/New_York:20270128T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000191-1801162800-1801170000@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-01-28/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270202T190000
+DTEND;TZID=America/New_York:20270202T210000
+DTSTAMP:20251230T192013Z
+CREATED:20251230T192013Z
+LAST-MODIFIED:20251230T192013Z
+UID:10000410-1801594800-1801602000@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night/2027-02-02/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270204T190000
+DTEND;TZID=America/New_York:20270204T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000192-1801767600-1801774800@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-02-04/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270211T190000
+DTEND;TZID=America/New_York:20270211T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000193-1802372400-1802379600@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-02-11/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270216T190000
+DTEND;TZID=America/New_York:20270216T210000
+DTSTAMP:20260616T213932Z
+CREATED:20251230T192533Z
+LAST-MODIFIED:20260616T213932Z
+UID:10000530-1802804400-1802811600@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night-2/2027-02-16/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270218T190000
+DTEND;TZID=America/New_York:20270218T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000194-1802977200-1802984400@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-02-18/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270225T190000
+DTEND;TZID=America/New_York:20270225T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000195-1803582000-1803589200@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-02-25/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270302T190000
+DTEND;TZID=America/New_York:20270302T210000
+DTSTAMP:20251230T192013Z
+CREATED:20251230T192013Z
+LAST-MODIFIED:20251230T192013Z
+UID:10000411-1804014000-1804021200@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night/2027-03-02/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270304T190000
+DTEND;TZID=America/New_York:20270304T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000196-1804186800-1804194000@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-03-04/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270311T190000
+DTEND;TZID=America/New_York:20270311T210000
+DTSTAMP:20260616T213856Z
+CREATED:20251222T181423Z
+LAST-MODIFIED:20260616T213856Z
+UID:10000197-1804791600-1804798800@farm.one
+SUMMARY:Trivia Night
+DESCRIPTION:Join us for NYC Trivia League’s recurring weekly trivia\, hosted by Mickey Nolan.\nFirst place gets $50 off their bar tab. \nSecond place gets a round of shots. \nThird place gets a round of short pour beers. \nFourth and fifth have been known to receive a special present from our dear host… \nPlease note\, there is no cap on the number of participants per team\, but you can only win the prizes with groups of 6 or fewer. 
+URL:https://farm.one/event/trivia-night/2027-03-11/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/new-trivia-wide.png
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20270316T190000
+DTEND;TZID=America/New_York:20270316T210000
+DTSTAMP:20260616T213932Z
+CREATED:20251230T192533Z
+LAST-MODIFIED:20260616T213932Z
+UID:10000531-1805223600-1805230800@farm.one
+SUMMARY:Bingo Night
+DESCRIPTION:BINGO NIGHT. Need we say more? Come by for a chance to win fun prizes and hang out at your favorite neighborhood farm. Hosted by the beloved Mickey Nolan. \n7pm!
+URL:https://farm.one/event/bingo-night-2/2027-03-16/
+ATTACH;FMTTYPE=image/png:https://farm.one/wp-content/uploads/2025/12/weekly-bingo-wide-format-1.png
+END:VEVENT
+END:VCALENDAR

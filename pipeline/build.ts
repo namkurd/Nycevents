@@ -12,6 +12,7 @@ import { collectSubstack } from './collectors/substack.ts';
 import { collectOhMyRockness } from './collectors/ohmyrockness.ts';
 import { collectThoughtGallery } from './collectors/thoughtgallery.ts';
 import { collectCurated } from './collectors/curated.ts';
+import { collectLocal } from './collectors/local.ts';
 import { isRepertoryPick, REP_ONE_NIGHT } from './categories.ts';
 import { dedupe, type VenueIndex } from './dedupe.ts';
 import { loadExtracted, writeInbox } from './inbox.ts';
@@ -96,6 +97,7 @@ export async function run(): Promise<void> {
     ['ohmyrockness', () => collectOhMyRockness(ROOT, DAYS)],
     ['thoughtgallery', () => collectThoughtGallery(ROOT, DAYS)],
     ['curated', () => collectCurated(ROOT, DAYS)],
+    ['local', () => collectLocal(ROOT, DAYS)],
   ];
   for (const [id, fn] of collectors) {
     try {
