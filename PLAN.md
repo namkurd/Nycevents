@@ -187,11 +187,16 @@ Do them in order, and stop at each gate.
 *Gate M2:* using `ArtifactData`, list `marks` and confirm both people's docs exist after each has starred an event. The owner then shares the page from its Share menu.
 
 ### M3 — Full curation and daily refresh
-- [ ] Substack parsers for all three feeds; Oh My Rockness and Thought Gallery browser collectors.
-- [ ] Picks ranking switched on with all sources.
-- [ ] With the owner's OK, create a daily scheduled task (about 5:40am New York) that starts a fresh session in the NYC Events environment with this repo. It runs the pipeline (which fills `data/inbox/`), extracts the inbox files itself (spec 5), re-runs `npm run pipeline`, commits `data/cache/`, and republishes the page's data `files` to the same artifact URL.
+- [x] Substack parsers for all three feeds; Oh My Rockness and Thought Gallery browser collectors.
+- [x] Picks ranking switched on with all sources.
+- [x] With the owner's OK, create a daily scheduled task (about 5:40am New York) that starts a fresh session in the NYC Events environment with this repo. It runs the pipeline (which fills `data/inbox/`), extracts the inbox files itself (spec 5), re-runs `npm run pipeline`, commits `data/cache/`, and republishes the page's data `files` to the same artifact URL.
 
-*Gate M3:* 7 straight days of fresh data with no manual fixes. Each run reports one status line: counts per source and any failed sources.
+- Scheduled task "City Docket refresh" (`trig_013N5QWJq9sio7nVA4McGD2p`) runs **Mondays and Thursdays at 5:40am New York** (owner's choice, Nov 16), in a fresh NYC Events session that follows `DAILY.md`.
+- Live counts, Nov 16: fomo 42,470 · Oh My Rockness 682 (123 recommended) · Thought Gallery 217 · NYC for FREE 118 · The Skint 95 · field notes 25 · City Happenings 20 · Reading the City 19 → 36,718 events, 600 picks.
+
+**Rhythms (owner's request, Nov 16).** The owner's offline sheet of activity types and frequencies lives in the page's shared db at `rhythms/list`: `{ items: { id: { name, group: 'date'|'chill', goalDays, last, cats[], words[], archived } }, log: { key: { rid, date, title, eventId, by } } }`. Status matches the sheet: Greenin under 75% of the goal, Coolin from 75 to 100%, Overdue past it. An event matches a rhythm when its category is in `cats` (if any) and its text contains one of `words` (if any). Ranking nudge on the event's own date: −2 in the first half after logging, −1 until 75%, +1 when Coolin, +2 to +4 when Overdue. Logging happens from the Rhythms view ("We did this today") or from an event's panel ("We did this", for events on or before today); it moves `last` forward and appends to `log`. Edits use db `update` on `items.<id>`, so the two people can change different rhythms without overwriting each other.
+
+*Gate M3:* twice-weekly refreshes for two weeks of fresh data with no manual fixes. Each run reports one status line: counts per source and any failed sources.
 
 ### M4 — Extras (in order of the owner's interest)
 - [ ] Map view (MapLibre from a CDN, using the lat/lng already in events).
