@@ -2,15 +2,24 @@ import { z } from 'zod';
 
 export const SOURCE_IDS = [
   'fomo', 'nycforfree', 'skint', 'cityhappenings', 'readingthecity',
-  'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated',
+  'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory',
 ] as const;
 export const SourceId = z.enum(SOURCE_IDS);
 export type SourceId = z.infer<typeof SourceId>;
 
 /** Sources whose inclusion of an event counts as an editorial pick. */
 export const PICK_SOURCES: SourceId[] = [
-  'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery',
+  'skint', 'cityhappenings', 'readingthecity', 'fieldnotes', 'ohmyrockness', 'thoughtgallery', 'curated', 'repertory',
 ];
+
+/**
+ * How much each kind of pick counts in the score. Newsletters and hand-kept free nights are trusted
+ * curators (3); Thought Gallery and repertory specials (2); Oh My Rockness "recommended" (1), so music
+ * does not crowd out everything else (owner's request, Nov 16).
+ */
+export const PICK_WEIGHTS: Partial<Record<SourceId, number>> = {
+  skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, ohmyrockness: 1,
+};
 
 export const CATEGORIES = [
   'art', 'film', 'music', 'talks', 'books', 'theater-dance', 'comedy',
@@ -20,7 +29,7 @@ export const Category = z.enum(CATEGORIES);
 export type Category = z.infer<typeof Category>;
 
 /** Reasons an event is hidden unless the viewer turns the group back on. */
-export const HIDE_REASONS = ['fitness', 'brand-popup', 'chain-cinema'] as const;
+export const HIDE_REASONS = ['fitness', 'brand-popup', 'chain-cinema', 'library-program'] as const;
 export const HideReason = z.enum(HIDE_REASONS);
 export type HideReason = z.infer<typeof HideReason>;
 

@@ -63,6 +63,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   display: grid; gap: 10px;
 }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bar > * { min-width: 0; }
 .brand { font-weight: 800; font-stretch: 112%; font-size: 20px; letter-spacing: -.01em; margin-right: 6px; }
 .brand span { color: var(--ink); }
 .brand span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--accent); margin-right: 7px; vertical-align: 1px; }
@@ -71,6 +72,20 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .seg { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 3px; gap: 2px; }
 .seg button { border: 0; background: transparent; padding: 5px 11px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+#whenSeg { flex-wrap: wrap; border-radius: 16px; }
+#viewSeg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+#viewSeg::-webkit-scrollbar { display: none; }
+#viewSeg button { flex: none; }
+.feed { display: grid; gap: 18px; }
+.feed-sec { display: grid; gap: 8px; }
+.feed-sec > header { display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--ink); padding-bottom: 4px; }
+.feed-sec h2 { margin: 0; font-size: 17px; font-weight: 800; font-stretch: 108%; }
+.feed-sec .sub { color: var(--muted); font-size: 12.5px; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.travel { font-size: 11.5px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.pass-row { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.status.three { grid-template-columns: 1fr 1fr 1fr; }
+.status button.pass[aria-pressed="true"] { background: var(--muted); border-color: var(--muted); color: var(--bg); }
 .icon-btn { border: 1px solid var(--line); background: var(--surface); width: 32px; height: 32px; border-radius: 999px; display: inline-grid; place-items: center; font-size: 16px; line-height: 1; }
 .btn { border: 1px solid var(--line); background: var(--surface); padding: 5px 11px; border-radius: 999px; font-weight: 600; font-size: 13px; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
@@ -227,10 +242,13 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   </div>
   <div class="row">
     <div class="seg" role="group" aria-label="View" id="viewSeg">
-      <button data-view="week">Week</button><button data-view="day">Day</button><button data-view="month">Month</button><button data-view="list">List</button><button data-view="ours">Ours</button><button data-view="rhythms">Rhythms</button>
+      <button data-view="forus">For us</button><button data-view="week">Week</button><button data-view="day">Day</button><button data-view="month">Month</button><button data-view="list">List</button><button data-view="ours">Ours</button><button data-view="rhythms">Rhythms</button>
     </div>
     <div class="seg" role="group" aria-label="What to show" id="modeSeg">
       <button data-mode="picks" title="Events chosen by your newsletters">Picks</button><button data-mode="all" title="Everything listed">Everything</button>
+    </div>
+    <div class="seg" role="group" aria-label="When" id="whenSeg">
+      <button data-when="week">Next 7 days</button><button data-when="tonight">Tonight</button><button data-when="tomorrow">Tomorrow</button><button data-when="weekend">This weekend</button><button data-when="nextweek">Next week</button>
     </div>
     <input class="search" id="q" type="search" placeholder="Search titles, venues&hellip;" aria-label="Search">
   </div>
@@ -299,9 +317,11 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     n.innerHTML = `<svg viewBox="0 0 24 24">${ICON_PATHS[k]}</svg>`;
     return n;
   }
-  const SOURCES = { fomo: 'fomo.nyc', nycforfree: 'NYC for FREE', skint: 'The Skint', cityhappenings: 'City Happenings', readingthecity: 'Reading the City', fieldnotes: 'field notes', ohmyrockness: 'Oh My Rockness', thoughtgallery: 'Thought Gallery', curated: 'Curated' };
-  const SHORT = { nycforfree: 'NYC4FREE', skint: 'Skint', cityhappenings: 'City Hap.', readingthecity: 'Reading', fieldnotes: 'Field notes', ohmyrockness: 'OMR', thoughtgallery: 'Thought G.', curated: 'Curated' };
-  const HIDDEN = { fitness: 'Fitness classes', 'brand-popup': 'Brand pop-ups', 'chain-cinema': 'Chain cinema showtimes' };
+  const SOURCES = { repertory: 'Repertory special', fomo: 'fomo.nyc', nycforfree: 'NYC for FREE', skint: 'The Skint', cityhappenings: 'City Happenings', readingthecity: 'Reading the City', fieldnotes: 'field notes', ohmyrockness: 'Oh My Rockness', thoughtgallery: 'Thought Gallery', curated: 'Free museum night' };
+  const SHORT = { nycforfree: 'NYC4FREE', skint: 'Skint', cityhappenings: 'City Hap.', readingthecity: 'Reading', fieldnotes: 'Field notes', ohmyrockness: 'OMR', thoughtgallery: 'Thought G.', curated: 'Free night', repertory: 'Repertory' };
+  // Same weights as the pipeline: trusted curators 3, Thought Gallery and repertory specials 2, Oh My Rockness 1.
+  const PICK_W = { skint: 3, cityhappenings: 3, readingthecity: 3, fieldnotes: 3, curated: 3, thoughtgallery: 2, repertory: 2, ohmyrockness: 1 };
+  const HIDDEN = { fitness: 'Fitness classes', 'brand-popup': 'Brand pop-ups', 'chain-cinema': 'Chain cinema showtimes', 'library-program': 'Library classes & kids programs' };
   const ROUTE_COLORS = { '1': '#ee352e', '2': '#ee352e', '3': '#ee352e', '4': '#00933c', '5': '#00933c', '6': '#00933c', '7': '#b933ad', A: '#0039a6', C: '#0039a6', E: '#0039a6', B: '#ff6319', D: '#ff6319', F: '#ff6319', M: '#ff6319', G: '#6cbe45', J: '#996633', Z: '#996633', L: '#a7a9ac', N: '#fccc0a', Q: '#fccc0a', R: '#fccc0a', W: '#fccc0a', S: '#808183', FS: '#808183', GS: '#808183', H: '#808183' };
   const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -339,11 +359,12 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
 
   // ---------- state ----------
   const S = {
-    view: store.get('view', window.matchMedia('(max-width: 900px)').matches ? 'list' : 'week'),
+    view: store.get('view2', 'forus'),
+    when: 'week', expanded: new Set(), showPassed: false,
     mode: store.get('mode', 'picks'),
     anchor: today(),
     f: { free: false, direct: false, both: false, tod: 'any', boro: '', q: '', rhythm: '', cats: new Set(store.get('cats', [])) },
-    showHidden: store.get('showHidden', { fitness: false, 'brand-popup': false, 'chain-cinema': false }),
+    showHidden: { fitness: false, 'brand-popup': false, 'chain-cinema': false, 'library-program': false, ...store.get('showHidden', {}) },
     index: null, weeks: new Map(), hiddenWeeks: new Map(), loading: new Map(),
     me: null, canWrite: true, marks: {}, people: {}, dbReady: false,
     rhythms: { items: {}, log: {} }, rhythmsExists: false, editing: null,
@@ -390,7 +411,9 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   // ---------- marks (shared db) ----------
   const markOf = (uid, id) => S.marks[uid]?.events?.[id];
   const myMark = id => (S.me ? markOf(S.me, id) : undefined);
-  const markersOf = id => Object.keys(S.marks).filter(uid => markOf(uid, id)?.s);
+  const markersOf = id => Object.keys(S.marks).filter(uid => ['interested', 'going'].includes(markOf(uid, id)?.s));
+  const passedBy = id => Object.keys(S.marks).filter(uid => markOf(uid, id)?.s === 'pass');
+  const isPassed = id => passedBy(id).length > 0 && !markersOf(id).length;
   const isMarked = id => markersOf(id).length > 0;
   const bothInterested = id => { const m = markersOf(id); return m.length >= 2; };
 
@@ -448,7 +471,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const mine = S.marks[S.me] ? structuredClone(S.marks[S.me]) : { events: {} };
     mine.events = mine.events || {};
     const cur = mine.events[e.id] || {};
-    const next = { ...cur, ...patch, at: Date.now(), t: e.title, d: e.start, e: e.end || null, v: e.venue?.name || '', a: e.venue?.address || '', u: e.url };
+    const next = { ...cur, ...patch, at: Date.now(), t: e.title, d: e.start, e: e.end || null, v: e.venue?.name || '', a: e.venue?.address || '', u: e.url, c: e.category };
     for (const k of Object.keys(next)) if (next[k] === undefined) delete next[k];
     if (!next.s && !next.n) delete mine.events[e.id]; else mine.events[e.id] = next;
     // Prune marks for events more than 60 days past to stay well under the document size limit.
@@ -537,12 +560,12 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     let best = -Infinity;
     for (const r of rs) {
       const { state, ratio } = rStatus(r, day < today() ? today() : day);
-      const b = state === 'overdue' ? 2 + Math.min(2, (ratio - 1) * 2) : state === 'coolin' ? 1 : ratio < 0.5 ? -2 : -1;
+      const b = state === 'overdue' ? 2 + Math.min(1, (ratio - 1)) : state === 'coolin' ? 1 : ratio < 0.5 ? -2 : -1; // overdue tops out at +3, level with one curator pick
       best = Math.max(best, b);
     }
     return best;
   }
-  const effScore = e => (e.score || 0) + rBoost(e) + homeBonus(e);
+  const effScore = e => (e.score || 0) + rBoost(e) + homeBonus(e) - passPenalty(e);
   const fmtDays = n => `${n} day${n === 1 ? '' : 's'}`;
   function rLabel(r) {
     const st = rStatus(r);
@@ -569,10 +592,54 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     toast(`Logged ${r.name} on ${shortDate(date)}.`);
   }
 
+  // ---------- picks balance, "Not for us", travel time ----------
+  const pickWeight = e => e.pickedBy.reduce((n, p) => n + (PICK_W[p] ?? 3), 0);
+  const isLightPick = e => e.pickedBy.length > 0 && e.pickedBy.every(p => (PICK_W[p] ?? 3) <= 2);
+  /** In Picks, lighter picks (repertory, Oh My Rockness, Thought Gallery) are capped at 3 per type per day; curator picks always show. */
+  function balance(list) {
+    if (S.mode !== 'picks' || S.f.rhythm) return list;
+    const keep = new Set(); const count = new Map();
+    for (const e of list.filter(isLightPick).sort((a, b) => effScore(b) - effScore(a))) {
+      const k = `${dayOf(e)}|${e.category}`; const n = count.get(k) || 0;
+      if (n < 3) { keep.add(e); count.set(k, n + 1); }
+    }
+    return list.filter(e => !isLightPick(e) || keep.has(e) || isMarked(e.id));
+  }
+  /** Similar to something either of you passed on: same venue, or two shared title words. */
+  function passPenalty(e) {
+    const passed = []; for (const doc of Object.values(S.marks)) for (const m of Object.values(doc.events || {})) if (m.s === 'pass') passed.push(m);
+    if (!passed.length) return 0;
+    const tk = new Set(e.title.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3));
+    let p = 0;
+    for (const m of passed) {
+      if (m.v && m.v === e.venue?.name) p = Math.max(p, 1);
+      const shared = (m.t || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3 && tk.has(w)).length;
+      if (shared >= 2) p = Math.max(p, 1.5);
+    }
+    return p;
+  }
+  /** Rough door-to-door estimate from home. Direct lines use their mode's speed; otherwise assume one transfer. */
+  function travelOf(e) {
+    const g = geoOf(e); if (!g) return null;
+    const km = g.homeKm * 1.3; // streets and tracks are longer than a straight line
+    if (g.homeKm < 1.1) return { min: Math.max(5, Math.round((km / 4.8) * 60 / 5) * 5), how: 'walk' };
+    const tr = g.transit;
+    if (tr) {
+      const subway = tr.routes.filter(r => !/^[BMQSX]\d/i.test(r));
+      const line = subway[0] || tr.routes[0];
+      const speed = subway.length ? 27 : 13;
+      const min = 4 + (subway.length ? 5 : 8) + (km / speed) * 60 + tr.walkM / 80;
+      return { min: Math.round(min / 5) * 5, how: subway.length ? `${line === 'FS' ? 'S' : line} train` : `${line.replace('+', ' SBS')} bus` };
+    }
+    return { min: Math.round((12 + (km / 22) * 60) / 5) * 5, how: 'transit' };
+  }
+  const travelText = e => { const t = travelOf(e); return t ? `≈${t.min} min ${t.how === 'walk' ? 'walk' : t.how === 'transit' ? 'by transit' : 'on the ' + t.how}` : ''; };
+
   // ---------- filtering ----------
   function passes(e, opts = {}) {
     const marked = isMarked(e.id);
     if (e.hide && e.hide.length && !e.hide.some(h => S.showHidden[h]) && !marked) return false;
+    if (!S.showPassed && isPassed(e.id)) return false;
     if (!opts.ignoreMode && !S.f.rhythm && S.mode === 'picks' && !e.pickedBy.length && !marked) return false;
     if (S.f.rhythm) { const r = S.rhythms.items[S.f.rhythm]; if (!r || !rMatches(r, e)) return false; }
     const f = S.f;
@@ -615,6 +682,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     if (e.rsvp) b.push(el('span', { class: 'tag', text: 'RSVP' }));
     for (const r of eventRhythms(e)) { const st = rStatus(r); if (st.state !== 'greenin' || full) b.push(el('span', { class: 'tag rtag', title: `${r.name}: ${RSTATE[st.state]} (${rLabel(r)})` }, el('i', { style: `background:var(--st-${st.state === 'overdue' ? 'over' : st.state === 'coolin' ? 'cool' : 'green'})` }), r.name)); }
     const tr = transitOf(e); if (tr) for (const r of tr.routes.slice(0, full ? 8 : 3)) b.push(routeBullet(r));
+    const tt = travelText(e); if (tt) b.push(el('span', { class: 'travel', text: tt }));
     return b;
   }
   function stub(e, opts = {}) {
@@ -672,7 +740,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const grid = el('div', { class: 'week compact' });
     for (let i = 0; i < 7; i++) {
       const d = addDays(from, i);
-      const list = events.filter(e => dayOf(e) === d && passes(e));
+      const list = balance(events.filter(e => dayOf(e) === d && passes(e)));
       const { shown, extra } = capList(list, CAP.week[S.mode]);
       const col = el('div', { class: `day${d === t ? ' today' : ''}${d < t ? ' past' : ''}` },
         el('div', { class: 'day-head' }, el('span', { class: 'dname', text: DOW[dow(d)] }), el('span', { class: 'dnum', text: `${shortDate(d)} · ${list.length}` })));
@@ -691,7 +759,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const t = today(); let any = false;
     for (let d = from; d <= to; d = addDays(d, 1)) {
       if (d < t && kind === 'list') continue;
-      const list = events.filter(e => dayOf(e) === d && passes(e));
+      const list = balance(events.filter(e => dayOf(e) === d && passes(e)));
       if (!list.length) continue;
       any = true;
       const { shown, extra } = capList(list, CAP.list[S.mode]);
@@ -714,7 +782,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
   }
   function viewDay(d) {
     const { events, ongoing } = eventsIn(d, d);
-    const list = events.filter(e => passes(e));
+    const list = balance(events.filter(e => passes(e)));
     const wrap = el('div', { class: 'agenda' });
     const db0 = dueBar(events); if (db0) wrap.append(db0);
     const ov = onView(ongoing); if (ov) wrap.append(ov);
@@ -728,9 +796,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       for (const e of s) (groups.get(e.category) || groups.set(e.category, []).get(e.category)).push(e);
       const ordered = [...groups.entries()].sort((a, b) => b[1].length - a[1].length || CAT_ORDER.indexOf(a[0]) - CAT_ORDER.indexOf(b[0]));
       wrap.append(el('section', { class: 'slot' }, el('h3', { text: `${name} · ${s.length}` }),
-        ordered.map(([cat, list]) => el('div', { class: 'grp' },
-          el('div', { class: 'grp-head' }, icon(cat), (CATS[cat] || CATS.other)[0], el('span', { class: 'n', text: String(list.length) })),
-          el('div', { class: 'grid' }, list.map(e => stub(e)))))));
+        ordered.map(([cat, list]) => {
+          const key = `${d}|${name}|${cat}`; const open = S.expanded.has(key);
+          const top = open ? list : list.slice().sort(byScore).slice(0, 5).sort(byTime);
+          return el('div', { class: 'grp' },
+            el('div', { class: 'grp-head' }, icon(cat), (CATS[cat] || CATS.other)[0], el('span', { class: 'n', text: String(list.length) })),
+            el('div', { class: 'grid' }, top.map(e => stub(e))),
+            list.length > 5 ? el('button', { class: 'more-btn', onclick: () => { open ? S.expanded.delete(key) : S.expanded.add(key); render(); }, text: open ? 'Show top 5' : `Show all ${list.length}` }) : null);
+        })));
     }
     if (!list.length) wrap.append(emptyNote(S.mode === 'picks' ? 'No picks this day. Switch to Everything to see all listings.' : 'Nothing matches these filters.'));
     if (extra) wrap.append(el('div', { class: 'hint', text: `Showing the top ${shown.length} of ${list.length.toLocaleString()} by score. Narrow with search or filters to see the rest.` }));
@@ -742,7 +815,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const t = today();
     const { events } = eventsIn(start, addDays(start, 41));
     const byDay = new Map();
-    for (const e of events) if (passes(e)) { const d = dayOf(e); (byDay.get(d) || byDay.set(d, []).get(d)).push(e); }
+    for (const e of balance(events.filter(e => passes(e)))) { const d = dayOf(e); (byDay.get(d) || byDay.set(d, []).get(d)).push(e); }
     const grid = el('div', { class: 'month' }, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(n => el('div', { class: 'dow', text: n })));
     for (let i = 0; i < 42; i++) {
       const d = addDays(start, i);
@@ -755,6 +828,66 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     }
     return el('div', { class: 'agenda' }, grid, el('div', { class: 'hint', text: 'Each day shows its top three by score. Tap a day to see everything.' }));
   }
+  /** Date range for a time preset. */
+  function whenRange(w) {
+    const t = today(); const dw = dow(t);
+    if (w === 'tonight') return [t, t];
+    if (w === 'tomorrow') return [addDays(t, 1), addDays(t, 1)];
+    if (w === 'weekend') { const fri = dw === 0 ? addDays(t, -2) : dw === 6 ? addDays(t, -1) : addDays(t, 5 - dw); return [fri < t ? t : fri, addDays(fri, 2)]; }
+    if (w === 'nextweek') { const mon = addDays(mondayOf(t), 7); return [mon, addDays(mon, 6)]; }
+    return [t, addDays(t, 6)];
+  }
+  const WHEN_LABEL = { week: 'Next 7 days', tonight: 'Tonight', tomorrow: 'Tomorrow', weekend: 'This weekend', nextweek: 'Next week' };
+  /** Rank with variety: each extra pick of a type already chosen costs a little, so one type can't fill a section. */
+  function diversified(list, n) {
+    const pool = list.slice().sort((a, b) => effScore(b) - effScore(a)); const out = []; const seen = new Map();
+    while (out.length < n && pool.length) {
+      let bi = 0, bv = -Infinity;
+      for (let i = 0; i < Math.min(pool.length, 80); i++) { const v = effScore(pool[i]) - 1.2 * (seen.get(pool[i].category) || 0); if (v > bv) { bv = v; bi = i; } }
+      const [e] = pool.splice(bi, 1); out.push(e); seen.set(e.category, (seen.get(e.category) || 0) + 1);
+    }
+    return out;
+  }
+  /** "For us": picks, overdue rhythms, easy trips and your marks, blended and ranked. */
+  function forUsCandidate(e) {
+    if (!passes(e, { ignoreMode: true })) return false;
+    if (e.pickedBy.length > 0 || isMarked(e.id)) return true;
+    // Rhythm-only suggestions must also be practical: free, or a direct trip from home.
+    return rBoost(e) >= 1 && (!!transitOf(e) || !!e.price?.free) && (rBoost(e) >= 2 || !!transitOf(e));
+  }
+  function viewForUs() {
+    const [from, to] = whenRange(S.when);
+    const { events, ongoing } = eventsIn(from, to);
+    const t = today();
+    const nowHm = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+    const pool = events.filter(e => forUsCandidate(e) && !(dayOf(e) === t && hhmm(e) && hhmm(e) < (S.when === 'tonight' ? '16:00' : nowHm)));
+    const wrap = el('div', { class: 'feed' });
+    const db0 = dueBar(events); if (db0) wrap.append(db0);
+    const sections = [];
+    if (S.when === 'week') {
+      const [ws, we] = whenRange('weekend');
+      sections.push(['Tonight', e => dayOf(e) === t && (hhmm(e) ? hhmm(e) >= '16:00' : e.pickedBy.length > 0), 6]);
+      sections.push(['Tomorrow', e => dayOf(e) === addDays(t, 1), 6]);
+      sections.push(['This weekend', e => dayOf(e) >= ws && dayOf(e) <= we && dayOf(e) > addDays(t, 1), 10]);
+      sections.push(['Later this week', e => dayOf(e) > addDays(t, 1) && !(dayOf(e) >= ws && dayOf(e) <= we), 10]);
+    } else {
+      sections.push([WHEN_LABEL[S.when], e => S.when !== 'tonight' || (hhmm(e) ? hhmm(e) >= '16:00' : e.pickedBy.length > 0), 30]);
+    }
+    let any = false;
+    for (const [title, fn, n] of sections) {
+      const list = pool.filter(fn); if (!list.length) continue;
+      any = true;
+      const top = diversified(list, n).sort((a, b) => a.start.localeCompare(b.start));
+      wrap.append(el('section', { class: 'feed-sec' },
+        el('header', {}, el('h2', { text: title }), el('span', { class: 'sub', text: `${top.length} of ${list.length} ranked for you` })),
+        el('div', { class: 'fgrid' }, top.map(e => stub(e, { showDate: title !== 'Tonight' && title !== 'Tomorrow' })))));
+    }
+    const ov = onView(ongoing.filter(e => forUsCandidate(e))); if (ov) wrap.append(ov);
+    if (!any) wrap.append(emptyNote('Nothing ranked for this window yet. Try another time, or open the calendar in Everything.'));
+    wrap.append(el('div', { class: 'hint', text: 'Ranked from newsletter picks, free museum nights, repertory specials, your overdue rhythms and how easy the trip is. Tap "Not for us" on anything to see less like it.' }));
+    return wrap;
+  }
+
   function viewOurs() {
     const wrap = el('div', { class: 'agenda' });
     const all = new Map();
@@ -763,7 +896,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       const cur = all.get(id) || { id, title: m.t, start: m.d, end: m.e, venue: { name: m.v, address: m.a }, url: m.u, who: [] };
       cur.who.push({ uid, s: m.s, n: m.n }); all.set(id, cur);
     }
-    let list = [...all.values()].filter(x => (x.start || '').slice(0, 10) >= addDays(today(), -1));
+    const passedList = [...all.values()].filter(x => x.who.every(w => w.s === 'pass'));
+    let list = [...all.values()].filter(x => (x.start || '').slice(0, 10) >= addDays(today(), -1) && x.who.some(w => w.s !== 'pass'));
     if (S.f.both) list = list.filter(x => x.who.length >= 2);
     list.sort((a, b) => a.start.localeCompare(b.start));
     const head = el('div', { class: 'row' },
@@ -784,6 +918,11 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
         el('span', { class: 'badges' }, x.who.map(w => el('span', { class: 'tag', style: `background:${person(w.uid).color};color:#fff`, text: `${initials(person(w.uid).name)} ${w.s === 'going' ? 'going' : 'interested'}` }))));
       wrap.append(row);
       for (const w of x.who) if (w.n) wrap.append(el('div', { class: 'hint', style: 'padding-left:56px', text: `${person(w.uid).name}: ${w.n}` }));
+    }
+    if (passedList.length) {
+      wrap.append(el('div', { class: 'section-label', text: `Not for us · ${passedList.length}` }));
+      for (const x of passedList.slice(0, 40)) wrap.append(el('div', { class: 'pass-row' }, el('span', { text: `${shortDate(x.start.slice(0, 10))} · ${x.title} · ${x.venue.name}` }),
+        S.canWrite && x.who.some(w => w.uid === S.me) ? el('button', { class: 'more-btn', onclick: () => setMark({ id: x.id, title: x.title, start: x.start, end: x.end, venue: x.venue, url: x.url, category: null }, { s: undefined }), text: 'Undo' }) : null));
     }
     return wrap;
   }
@@ -922,13 +1061,13 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
       el('div', { class: 'when', text: when }),
       el('div', { class: 'meta' },
         el('div', {}, el('strong', { text: e.venue.name }), e.venue.address ? ` · ${e.venue.address}` : '', e.venue.borough ? ` · ${e.venue.borough}` : ''),
-        transitOf(e) ? el('div', { class: 'badges row' }, 'Direct from home:', transitOf(e).routes.map(routeBullet), el('span', { text: `stop ${transitOf(e).walkM} m from the venue` })) : (homeKmOf(e) != null ? el('div', { text: `${homeKmOf(e)} km from home` }) : null),
+        transitOf(e) ? el('div', { class: 'badges row' }, `${travelText(e)} from home · direct:`, transitOf(e).routes.map(routeBullet), el('span', { text: `(stop ${transitOf(e).walkM} m from the venue)` })) : (homeKmOf(e) != null ? el('div', { text: `${travelText(e)} from home (${homeKmOf(e)} km; estimate)` }) : null),
         e.price?.text || e.price?.free ? el('div', { text: e.price.text || 'Free' }) : null,
         e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', e.pickedBy.map(p => el('span', { class: 'tag pickedby', text: SOURCES[p] || p }))) : null,
       ),
       e.description ? el('div', { class: 'desc', text: e.description }) : null,
       el('div', { class: 'section-label', text: 'Your plan' }),
-      el('div', { class: 'status' }, statusBtn('interested', 'Interested'), statusBtn('going', 'Going')),
+      el('div', { class: 'status three' }, statusBtn('interested', 'Interested'), statusBtn('going', 'Going'), el('button', { class: 'pass', 'aria-pressed': String(mine.s === 'pass'), disabled: !S.canWrite, title: 'Hide this for both of you and show fewer like it', onclick: () => { const undo = mine.s === 'pass'; setMark(e, { s: undo ? undefined : 'pass', n: myMark(e.id)?.n }); if (!undo) { closeDrawer(); toast('Hidden. Similar events will rank lower.'); } }, text: 'Not for us' })),
       note,
       others.map(uid => { const m = markOf(uid, e.id); const p = person(uid); return el('div', { class: 'partner' }, el('div', { class: 'row' }, avatar(uid), el('strong', { text: `${p.name}: ${m.s === 'going' ? 'Going' : m.s === 'interested' ? 'Interested' : 'Left a note'}` })), m.n ? el('div', { text: m.n }) : null); }),
       eventRhythms(e).length ? el('div', { class: 'section-label', text: 'Counts toward' }) : null,
@@ -956,6 +1095,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const m = mondayOf(S.anchor); return [m, addDays(m, 6)];
   }
   function rangeLabel() {
+    if (S.view === 'forus') return `For us · ${WHEN_LABEL[S.when]}`;
     if (S.view === 'ours') return 'Your plans';
     if (S.view === 'rhythms') return 'Your rhythms';
     if (S.view === 'day') return dLabel(S.anchor) + (S.anchor === today() ? ' · Today' : '');
@@ -969,7 +1109,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     else S.anchor = addDays(S.anchor, 7 * dir);
     render();
   }
-  function setView(v) { S.view = v; store.set('view', v); render(); }
+  function setView(v) { S.view = v; store.set('view2', v); render(); }
   function syncControls() {
     for (const b of document.querySelectorAll('#viewSeg button')) b.setAttribute('aria-pressed', String(b.dataset.view === S.view));
     for (const b of document.querySelectorAll('#modeSeg button')) b.setAttribute('aria-pressed', String(b.dataset.mode === S.mode));
@@ -980,7 +1120,9 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const nHidden = Object.values(S.showHidden).filter(Boolean).length;
     $('#hiddenSummary').textContent = nHidden ? `Hidden groups · ${nHidden} shown` : 'Hidden groups';
     $('#range').textContent = rangeLabel();
-    const nav = S.view !== 'ours' && S.view !== 'rhythms';
+    const nav = !['ours', 'rhythms', 'forus'].includes(S.view);
+    $('#whenSeg').hidden = S.view !== 'forus';
+    for (const b of document.querySelectorAll('#whenSeg button')) b.setAttribute('aria-pressed', String(b.dataset.when === S.when));
     $('#prev').hidden = !nav; $('#next').hidden = !nav; $('#todayBtn').hidden = !nav;
     $('#modeSeg').hidden = !nav;
     $('#filters').hidden = S.view === 'rhythms';
@@ -999,8 +1141,8 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const token = ++renderToken;
     const main = $('#main');
     if (!S.index) return;
-    if (S.view !== 'ours' && S.view !== 'rhythms') {
-      const [from, to] = rangeFor();
+    if (!['ours', 'rhythms'].includes(S.view)) {
+      const [from, to] = S.view === 'forus' ? whenRange(S.when) : rangeFor();
       const pending = weeksFor(from, to).some(w => !S.weeks.has(w.week) || (Object.values(S.showHidden).some(Boolean) && !S.hiddenWeeks.has(w.week)));
       if (pending) {
         if (!main.querySelector('.agenda')) main.replaceChildren(emptyNote('Loading listings…'));
@@ -1018,6 +1160,7 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     else if (S.view === 'day') body = viewDay(S.anchor);
     else if (S.view === 'month') body = viewMonth(S.anchor);
     else if (S.view === 'rhythms') body = viewRhythms();
+    else if (S.view === 'forus') body = viewForUs();
     else body = viewOurs();
     main.replaceChildren(body, footer() || '');
   }
@@ -1033,11 +1176,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     cats.append(el('button', { class: 'more-btn', onclick: () => { S.f.cats.clear(); store.set('cats', []); cats.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false')); render(); }, text: 'Clear' }));
     const ht = $('#hiddenToggles');
     ht.append(el('span', { class: 'hint', text: 'Hidden unless you turn them on:' }));
+    const pb = el('button', { class: 'chip', 'aria-pressed': 'false', onclick: () => { S.showPassed = !S.showPassed; pb.setAttribute('aria-pressed', String(S.showPassed)); render(); } }, 'Not for us');
+    setTimeout(() => ht.append(pb), 0);
     for (const [k, label] of Object.entries(HIDDEN)) {
       const b = el('button', { class: 'chip', 'aria-pressed': String(!!S.showHidden[k]), onclick: () => { S.showHidden[k] = !S.showHidden[k]; store.set('showHidden', S.showHidden); b.setAttribute('aria-pressed', String(S.showHidden[k])); render(); } }, label);
       ht.append(b);
     }
   }
+  $('#whenSeg').addEventListener('click', ev => { const w = ev.target.closest('button')?.dataset.when; if (w) { S.when = w; render(); } });
   $('#viewSeg').addEventListener('click', ev => { const v = ev.target.closest('button')?.dataset.view; if (v) setView(v); });
   $('#modeSeg').addEventListener('click', ev => { const m = ev.target.closest('button')?.dataset.mode; if (m) { S.mode = m; store.set('mode', m); render(); } });
   $('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);

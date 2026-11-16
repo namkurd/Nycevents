@@ -1,0 +1,76 @@
+{
+  "_about": "Recurring free museum admission, hand-kept. Every rule was read on the museum's own page on the date in verifiedAt; re-check before relying on one. weekday: 0=Sun..6=Sat. nth: 1-5 = that occurrence in the month, null = every week.",
+  "rules": [
+    {
+      "id": "whitney-free-friday-nights",
+      "title": "Whitney: Free Friday Night",
+      "venue": { "name": "Whitney Museum of American Art", "address": "99 Gansevoort St, New York, NY 10014, USA", "lat": 40.73959, "lng": -74.00886, "borough": "Manhattan" },
+      "weekday": 5, "nth": null, "start": "17:00", "end": "22:00",
+      "rsvp": true,
+      "note": "Free admission to all exhibitions. Advance tickets are required and capacity is limited.",
+      "url": "https://whitney.org/visit/free-admission",
+      "verifiedAt": "2026-11-16", "verifiedText": "Free Friday Nights (5–10 pm) … advance tickets are required"
+    },
+    {
+      "id": "whitney-free-second-sundays",
+      "title": "Whitney: Free Second Sunday",
+      "venue": { "name": "Whitney Museum of American Art", "address": "99 Gansevoort St, New York, NY 10014, USA", "lat": 40.73959, "lng": -74.00886, "borough": "Manhattan" },
+      "weekday": 0, "nth": 2, "start": null, "end": null,
+      "rsvp": true,
+      "note": "Free admission during museum hours. Advance tickets are required and capacity is limited.",
+      "url": "https://whitney.org/visit/free-admission",
+      "verifiedAt": "2026-11-16", "verifiedText": "Free Second Sundays … advance tickets are required"
+    },
+    {
+      "id": "noguchi-free-first-friday",
+      "title": "Noguchi Museum: Free First Friday",
+      "venue": { "name": "The Noguchi Museum", "address": "9-1 33rd Rd, Astoria, NY 11106, USA", "lat": 40.766831, "lng": -73.937693, "borough": "Queens" },
+      "weekday": 5, "nth": 1, "start": null, "end": null,
+      "rsvp": false,
+      "note": "Admission is free on the first Friday of every month; no reservation needed. Open until 8pm from May to September.",
+      "url": "https://www.noguchi.org/museum/visit/",
+      "verifiedAt": "2026-11-16", "verifiedText": "Admission is free on the first Friday of every month. Advance reservations are not required."
+    },
+    {
+      "id": "jewish-museum-free-third-thursdays",
+      "title": "Jewish Museum: Free Third Thursday",
+      "venue": { "name": "The Jewish Museum", "address": "1109 5th Ave &, E 92nd St, New York, NY 10128, USA", "lat": 40.78533, "lng": -73.95735, "borough": "Manhattan" },
+      "weekday": 4, "nth": 3, "start": "17:00", "end": "20:00",
+      "rsvp": false,
+      "note": "Free admission on the third Thursday of the month, 5–8pm.",
+      "url": "https://thejewishmuseum.org/visit",
+      "verifiedAt": "2026-11-16", "verifiedText": "Free Third Thursdays, 5 - 8 pm"
+    },
+    {
+      "id": "jewish-museum-free-saturdays",
+      "title": "Jewish Museum: Free Saturday",
+      "venue": { "name": "The Jewish Museum", "address": "1109 5th Ave &, E 92nd St, New York, NY 10128, USA", "lat": 40.78533, "lng": -73.95735, "borough": "Manhattan" },
+      "weekday": 6, "nth": null, "start": "11:00", "end": "18:00",
+      "rsvp": false,
+      "note": "Free admission on Saturdays (museum hours 11am–6pm).",
+      "url": "https://thejewishmuseum.org/visit",
+      "verifiedAt": "2026-11-16", "verifiedText": "Free Saturdays Free … Saturday: 11 am - 6 pm"
+    },
+    {
+      "id": "japan-society-free-first-fridays",
+      "title": "Japan Society Gallery: Free First Friday",
+      "venue": { "name": "Japan Society", "address": "333 E 47th St, New York, NY 10017, USA", "lat": 40.75251, "lng": -73.96829, "borough": "Manhattan" },
+      "weekday": 5, "nth": 1, "start": "17:00", "end": "19:00",
+      "rsvp": false,
+      "note": "Free gallery admission 5–7pm on first Fridays, during exhibitions. Check the gallery page for closures.",
+      "url": "https://japansociety.org/visit/",
+      "verifiedAt": "2026-11-16", "verifiedText": "Free First Fridays, 5-7 pm* … Visit Japan Society Gallery page for closures and Free First Friday dates"
+    },
+    {
+      "id": "mcny-free-wednesdays",
+      "title": "Museum of the City of New York: Free Wednesday",
+      "venue": { "name": "Museum of the City of New York", "address": "1220 5th Ave, New York, NY 10029, USA", "lat": 40.79249, "lng": -73.95191, "borough": "Manhattan" },
+      "weekday": 3, "nth": null, "start": "10:00", "end": "21:00",
+      "rsvp": false,
+      "note": "Free for everyone on Wednesdays; open late until 9pm.",
+      "url": "https://www.mcny.org/visit",
+      "overrides": { "2026-11-18": { "end": "14:00", "note": "Closing early at 2pm today." } },
+      "verifiedAt": "2026-11-16", "verifiedText": "Wednesdays – Free for everyone … Open Late on Wednesdays until 9 … Wednesday, November 18: Closing early at 2 p.m."
+    }
+  ]
+}

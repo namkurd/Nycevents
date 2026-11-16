@@ -11,6 +11,8 @@ import { collectSkint } from './collectors/skint.ts';
 import { collectSubstack } from './collectors/substack.ts';
 import { collectOhMyRockness } from './collectors/ohmyrockness.ts';
 import { collectThoughtGallery } from './collectors/thoughtgallery.ts';
+import { collectCurated } from './collectors/curated.ts';
+import { isRepertoryPick, REP_ONE_NIGHT } from './categories.ts';
 import { dedupe, type VenueIndex } from './dedupe.ts';
 import { loadExtracted, writeInbox } from './inbox.ts';
 import { eventId, normKey } from './lib/text.ts';
@@ -93,6 +95,7 @@ export async function run(): Promise<void> {
     ['readingthecity', () => collectSubstack(ROOT, 'readingthecity')],
     ['ohmyrockness', () => collectOhMyRockness(ROOT, DAYS)],
     ['thoughtgallery', () => collectThoughtGallery(ROOT, DAYS)],
+    ['curated', () => collectCurated(ROOT, DAYS)],
   ];
   for (const [id, fn] of collectors) {
     try {
@@ -129,6 +132,17 @@ export async function run(): Promise<void> {
   const ids = new Set<string>();
   const valid: Event[] = [];
   let invalid = 0;
+  // Repertory specials: a run counts once (its first date); one-night extras (Q&A, guests) count every time.
+  const repRuns = new Set<string>();
+  for (const e of [...merged].sort((a, b) => a.start.localeCompare(b.start))) {
+    if (e.pickedBy.includes('repertory') || !isRepertoryPick(e)) continue;
+    const run = `${normKey(e.title)}|${normKey(e.venue.name)}`;
+    const oneNight = REP_ONE_NIGHT.test(`${e.title} ${e.description ?? ''}`);
+    if (repRuns.has(run) && !oneNight) continue;
+    repRuns.add(run);
+    e.pickedBy.push('repertory');
+    if (!e.sources.some(s => s.id === 'repertory')) e.sources.push({ id: 'repertory', url: e.url });
+  }
   for (const e of merged) {
     const geo = home && e.venue.lat != null && e.venue.lng != null ? scoreTransit(e.venue.lat, e.venue.lng, home, stops) : {};
     let id = eventId(e.title, e.start.slice(0, 10), e.venue.name);

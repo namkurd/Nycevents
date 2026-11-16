@@ -2,7 +2,7 @@ import type { Category, HideReason } from './schema.ts';
 
 /** fomo event_type -> category. Tags refine the ambiguous types below. */
 const FOMO_TYPE: Record<string, Category> = {
-  Screening: 'film', 'Watch Party': 'film',
+  Screening: 'film', 'Watch Party': 'community', // sports and TV watch parties are social, not cinema
   Exhibition: 'art', 'Immersive Experience': 'art',
   Concert: 'music',
   'Club Night': 'nightlife', Party: 'nightlife',
@@ -59,8 +59,35 @@ export function isChainCinema(url: string, venue: string): boolean {
   return CHAIN_DOMAINS.test(host) || CHAIN_VENUE.test(venue.trim());
 }
 
+/** Library classes, kids' and teen programs, games and services: hidden by default (owner's request, Nov 16).
+ *  Author talks, readings, screenings and concerts at libraries stay visible. */
+const LIBRARY_HOST = /(^|\.)(nypl\.org|bklynlibrary\.org|queenslibrary\.org|libcal\.com|bibliocommons\.com)$/i;
+const LIBRARY_TYPES = new Set(['Class', 'Workshop', 'Open Practice', 'Game', 'Service', 'Drop-In Service', 'Volunteer', 'Discussion Group', 'Mixer', 'Open House', 'Outing']);
+const LIBRARY_TAGS = new Set(['Kids', 'Teen Events', 'Storytime', 'Family', 'Language Learning', 'Beginner Friendly']);
+
+export function isLibraryProgram(eventType: string, tags: string[], category: Category, url: string, venue: string): boolean {
+  let host = '';
+  try { host = new URL(url).hostname; } catch { /* not a url */ }
+  if (!LIBRARY_HOST.test(host) && !/\blibrar(y|ies)\b/i.test(venue)) return false;
+  return LIBRARY_TYPES.has(eventType) || ['kids', 'fitness', 'other', 'food-drink'].includes(category) || tags.some(t => LIBRARY_TAGS.has(t));
+}
+
+/** Repertory houses: their special screenings count as picks (classics, 35mm, Q&As, restorations, series). */
+const REP_VENUE = /^(the )?(film forum|metrograph|ifc center|anthology film archives|angelika|village east by angelika|cinema village|brooklyn academy of music|bam\b|bam rose|nitehawk|museum of the moving image|film at lincoln center|walter reade|quad cinema|roxy cinema|spectacle theater|paris theater|light industry|japan society|museum of modern art|moma\b|dctv|low cinema)/i;
+const REP_SPECIAL = /\b(35\s?mm|70\s?mm|16\s?mm|q\s?&\s?a|in person|introduced by|intro(duction)? by|restor(ed|ation)|(new york|ny|nyc|u\.?s\.?|north american|world) premiere|retrospective|anniversary|double feature|tribute|revival)\b/i;
+/** Signals that belong to one screening rather than a whole run. */
+export const REP_ONE_NIGHT = /\b(q\s?&\s?a|in person|introduced by|intro(duction)? by|premiere|double feature|tribute)\b/i;
+
+export function isRepertoryPick(e: { category: Category; title: string; venue: { name: string }; description?: string; tags: string[]; start: string }): boolean {
+  if (e.category !== 'film' || !REP_VENUE.test(e.venue.name.trim())) return false;
+  const year = e.title.match(/\((19\d{2}|20\d{2})\)/)?.[1];
+  if (year && Number(year) <= Number(e.start.slice(0, 4)) - 2) return true; // an older film, not a first-run release
+  return REP_SPECIAL.test(`${e.title} ${e.description ?? ''} ${e.tags.join(' ')}`);
+}
+
 export function fomoHide(eventType: string, tags: string[], category: Category, url = '', venue = '', title = ''): HideReason[] {
   const out: HideReason[] = [];
+  if (isLibraryProgram(eventType, tags, category, url, venue)) out.push('library-program');
   if ((eventType === 'Screening' || category === 'film') && isChainCinema(url, venue)) out.push('chain-cinema');
   if (category === 'fitness') out.push('fitness');
   if (eventType === 'Pop-Up' || (eventType !== 'Market' && tags.some(x => POPUP_TAGS.has(x)))) out.push('brand-popup');
