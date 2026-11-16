@@ -57,3 +57,21 @@ describe('weights and groups', () => {
     expect(fomoCategory('Watch Party', ['Sports', 'Soccer'])).toBe('community');
   });
 });
+
+describe('prices stated in listings', async () => {
+  const { priceFromText, withStatedPrice } = await import('../pipeline/lib/price.ts');
+  it('reads explicit ticket prices and free wording only', () => {
+    expect(priceFromText('Tickets: $20 in advance.')?.text).toBe('Tickets: $20');
+    expect(priceFromText('Join us! $15 advance / $20 door. 21+')?.text).toBe('$15 advance / $20 door');
+    expect(priceFromText('General admission is $79')?.text).toBe('General admission is $79');
+    expect(priceFromText('$10 suggested donation at the door')?.text).toBe('$10 suggested donation');
+    expect(priceFromText('Free and open to the public.')).toEqual({ free: true, text: 'Free' });
+    expect(priceFromText('$5 drinks all night')).toBeNull();
+    expect(priceFromText('Win a $100 prize!')).toBeNull();
+  });
+  it('keeps a price a source already gave, and a source free tag over a dollar amount', () => {
+    expect(withStatedPrice({ price: { free: null, text: '$12' } }, 'Tickets $30').price.text).toBe('$12');
+    expect(withStatedPrice({ price: { free: true } }, 'Tickets $30').price).toEqual({ free: true });
+    expect(withStatedPrice({ price: { free: null } }, 'Tickets $30').price).toEqual({ free: null, text: 'Tickets $30' });
+  });
+});

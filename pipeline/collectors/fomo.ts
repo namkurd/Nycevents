@@ -8,6 +8,8 @@ import { getJson, saveRaw } from '../lib/http.ts';
 import { truncate, safeUrl } from '../lib/text.ts';
 import { addDays, nyIso, nyToday, parseClock } from '../lib/time.ts';
 import type { CollectResult, RawEvent } from '../schema.ts';
+import { withStatedPrice } from '../lib/price.ts';
+
 
 const BASE = 'https://fomo.nyc/data/';
 
@@ -112,6 +114,7 @@ export function parseFomo(chunks: FomoChunk[], locations: Map<number, FomoLocati
         ...(hide.length ? { hide } : {}),
       };
       const desc = descs[String(e.id)];
+      withStatedPrice(base, desc);
 
       const singles = e.occurrences.filter(o => !o[2] || o[2] === o[0]);
       if (singles.length) {

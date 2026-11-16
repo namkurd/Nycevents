@@ -23,6 +23,8 @@ import { score, isPick } from './rank.ts';
 import { Event, HIDE_REASONS, type CollectResult, type RawEvent, type SourceId } from './schema.ts';
 import { buildStops, loadStops } from './transit/build-stops.ts';
 import { homeConfig, scoreTransit } from './transit/home.ts';
+import { withStatedPrice } from './lib/price.ts';
+
 
 const ROOT = process.cwd();
 const DAYS = 28;
@@ -157,6 +159,7 @@ export async function run(): Promise<void> {
     if (!e.sources.some(s => s.id === 'repertory')) e.sources.push({ id: 'repertory', url: e.url });
   }
   for (const e of merged) {
+    withStatedPrice(e, e.description);
     const geo = home && e.venue.lat != null && e.venue.lng != null ? scoreTransit(e.venue.lat, e.venue.lng, home, stops) : {};
     let id = eventId(e.title, e.start.slice(0, 10), e.venue.name);
     if (ids.has(id)) id = eventId(`${e.title} ${e.url}`, e.start.slice(0, 10), e.venue.name);

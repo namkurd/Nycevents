@@ -86,7 +86,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .ev { padding: 12px 11px 12px 10px; }
   .status button { min-height: 52px; font-size: 15px; }
   .drawer .close { width: 44px; height: 44px; }
-  .drawer .actions .btn { flex: 1 1 140px; text-align: center; }
+  .drawer .actions .btn { flex: 1 1 140px; text-align: center; justify-content: center; }
   .search { min-height: 44px; font-size: 16px; }
   .pill { padding: 7px 12px; font-size: 13px; }
 }
@@ -127,6 +127,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .icon-btn { border: 1px solid var(--line); background: var(--surface); width: 32px; height: 32px; border-radius: 999px; display: inline-grid; place-items: center; font-size: 16px; line-height: 1; }
 .btn { border: 1px solid var(--line); background: var(--surface); padding: 5px 11px; border-radius: 999px; font-weight: 600; font-size: 13px; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+a.btn, a.tag { text-decoration: none; color: inherit; display: inline-flex; align-items: center; }
+a.btn.primary { color: var(--accent-ink); }
+.drawer .actions.top { margin-top: 2px; }
+.drawer .actions.top .btn { padding: 9px 16px; font-size: 14px; white-space: nowrap; flex: 1 1 auto; justify-content: center; }
+.tag.price { color: var(--ink); background: var(--sunk); text-transform: none; }
+.price-line strong { font-weight: 700; }
 .chip { border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
 .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -747,11 +753,20 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const yellow = c === '#fccc0a';
     return el('span', { class: 'route' + (yellow ? ' yellow' : ''), style: `background:${c}`, title: `${r} train`, text: r === 'FS' ? 'S' : r });
   }
+  /** Short price for a card: the first dollar amount (or range) the listing states, "+" when it lists more. */
+  function priceTag(e) {
+    const t = e.price?.text; if (!t) return '';
+    const all = t.match(/\$\d+(?:\.\d{2})?(?:\s*[-–]\s*\$?\d+(?:\.\d{2})?)?/g);
+    if (!all) return t.length <= 14 ? t : '';
+    const first = all[0].replace(/\.00\b/g, '').replace(/\s+/g, '');
+    return all.length > 1 && !/[-–]/.test(first) ? first + '+' : first;
+  }
   function badges(e, { full } = {}) {
     const b = [];
     if (isFollowed(e)) b.push(el('span', { class: 'tag pickedby', style: 'background:color-mix(in srgb, var(--c-community) 16%, transparent);color:var(--c-community)', title: 'A venue you follow', text: '★ Following' }));
     for (const p of e.pickedBy) b.push(el('span', { class: 'tag pickedby', title: `Picked by ${SOURCES[p] || p}`, text: SHORT[p] || p }));
     if (e.price && e.price.free) b.push(el('span', { class: 'tag free', text: 'Free' }));
+    else { const pt = priceTag(e); if (pt) b.push(el('span', { class: 'tag price', title: e.price.text, text: pt })); }
     if (e.rsvp) b.push(el('span', { class: 'tag', text: 'RSVP' }));
     for (const r of eventRhythms(e)) { const st = rStatus(r); if (st.state !== 'greenin' || full) b.push(el('span', { class: 'tag rtag', title: `${r.name}: ${RSTATE[st.state]} (${rLabel(r)})` }, el('i', { style: `background:var(--st-${st.state === 'overdue' ? 'over' : st.state === 'coolin' ? 'cool' : 'green'})` }), r.name)); }
     const tr = transitOf(e); if (tr) for (const r of tr.routes.slice(0, full ? 8 : 3)) b.push(routeBullet(r));
@@ -1031,12 +1046,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     else p.set('dates', `${utcStamp(e.start)}/${utcStamp(endOf(e))}`);
     return 'https://calendar.google.com/calendar/render?' + p.toString();
   }
-  function outlookUrl(e) {
-    const p = new URLSearchParams({ path: '/calendar/action/compose', rru: 'addevent', subject: e.title, body: details(e), location: where(e) });
-    if (!hhmm(e)) { p.set('startdt', dayOf(e)); p.set('enddt', addDays(dayOf(e), 1)); p.set('allday', 'true'); }
-    else { p.set('startdt', new Date(e.start).toISOString()); p.set('enddt', new Date(endOf(e)).toISOString()); }
-    return 'https://outlook.live.com/calendar/0/deeplink/compose?' + p.toString();
-  }
   async function exportGoing() {
     const rows = [['Subject', 'Start Date', 'Start Time', 'End Date', 'End Time', 'All Day Event', 'Description', 'Location']];
     const mine = S.me ? Object.values(S.marks[S.me]?.events || {}) : [];
@@ -1065,7 +1074,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
     const others = Object.keys(S.marks).filter(uid => uid !== S.me && markOf(uid, e.id));
     const cat = CATS[e.category] || CATS.other;
     const when = e.ongoing ? `On view ${shortDate(e.ongoing.from)} – ${shortDate(e.ongoing.to)}` : `${dLabel(dayOf(e))} · ${clock(hhmm(e))}${e.end && hhmm(e) ? ' – ' + clock(e.end.slice(11, 16)) : ''}`;
-    const links = [['Event page', e.url], ...Object.entries(e.links || {}).map(([k, u]) => [SOURCES[k] || k, u])];
     const note = el('textarea', { class: 'note', id: 'noteBox', placeholder: S.canWrite ? 'Add a note for the two of you (e.g. "dinner nearby first?")' : 'Notes are view-only for you', disabled: !S.canWrite });
     note.value = mine.n || '';
     note.addEventListener('change', () => setMark(e, { n: note.value.trim() || undefined, s: myMark(e.id)?.s }));
@@ -1079,9 +1087,14 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
         el('div', { class: 'row' }, el('span', {}, el('strong', { text: e.venue.name }), e.venue.address ? ` · ${e.venue.address}` : '', e.venue.borough ? ` · ${e.venue.borough}` : ''),
           S.canWrite && db && !/^see listing$/i.test(e.venue.name) ? el('button', { class: 'btn', 'aria-pressed': String(isFollowed(e)), onclick: () => toggleFollow(e), text: isFollowed(e) ? '★ Following' : '☆ Follow venue' }) : null),
         transitOf(e) ? el('div', { class: 'badges row' }, `${travelText(e)} from home · direct:`, transitOf(e).routes.map(routeBullet), el('span', { text: `(stop ${transitOf(e).walkM} m from the venue)` })) : (homeKmOf(e) != null ? el('div', { text: `${travelText(e)} from home (${homeKmOf(e)} km; estimate)` }) : null),
-        e.price?.text || e.price?.free ? el('div', { text: e.price.text || 'Free' }) : null,
-        e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', e.pickedBy.map(p => el('span', { class: 'tag pickedby', text: SOURCES[p] || p }))) : null,
+        e.price?.text || e.price?.free ? el('div', { class: 'price-line' }, el('strong', { text: e.price.free && !/\$/.test(e.price.text || '') ? 'Free' : 'Price' }), e.price.text && !/^free$/i.test(e.price.text) ? ` · ${e.price.text}` : '') : null,
+        e.pickedBy.length ? el('div', { class: 'badges row' }, 'Picked by', e.pickedBy.map(p => e.links?.[p] && e.links[p] !== e.url
+          ? el('a', { class: 'tag pickedby', href: e.links[p], target: '_blank', rel: 'noopener', title: `Open the ${SOURCES[p] || p} listing`, text: `${SOURCES[p] || p} ↗` })
+          : el('span', { class: 'tag pickedby', text: SOURCES[p] || p }))) : null,
       ),
+      el('div', { class: 'actions top' },
+        el('a', { class: 'btn primary', href: googleUrl(e), target: '_blank', rel: 'noopener', text: 'Add to Google Calendar' }),
+        el('a', { class: 'btn', href: e.url, target: '_blank', rel: 'noopener', text: 'Go to Event Page' })),
       e.description ? el('div', { class: 'desc', text: e.description }) : null,
       el('div', { class: 'section-label', text: 'Your plan' }),
       el('div', { class: 'status three' }, statusBtn('interested', 'Interested'), statusBtn('going', 'Going'), el('button', { class: 'pass', 'aria-pressed': String(mine.s === 'pass'), disabled: !S.canWrite, title: 'Hide this for both of you and show fewer like it', onclick: () => { const undo = mine.s === 'pass'; setMark(e, { s: undo ? undefined : 'pass', n: myMark(e.id)?.n }); if (!undo) { closeDrawer(); toast('Hidden. Similar events will rank lower.'); } }, text: 'Not for us' })),
@@ -1092,12 +1105,6 @@ button.pill[aria-pressed="true"] { border-color: currentColor; }
         el('span', { class: `pill ${st.state}`, text: `${r.name} · ${RSTATE[st.state]}` }), el('span', { class: 'hint', text: rLabel(r) }), el('div', { class: 'spacer' }),
         S.canWrite && !e.ongoing && dayOf(e) <= today() ? el('button', { class: 'btn', onclick: () => logDone(r, dayOf(e), e), text: 'We did this' }) : null,
         S.canWrite && (e.ongoing || dayOf(e) > today()) ? el('span', { class: 'hint', text: 'Log it here after you go' }) : null); })) : null,
-      el('div', { class: 'section-label', text: 'Add to calendar' }),
-      el('div', { class: 'actions' },
-        el('a', { class: 'btn primary', href: googleUrl(e), target: '_blank', rel: 'noopener', text: 'Google Calendar' }),
-        el('a', { class: 'btn', href: outlookUrl(e), target: '_blank', rel: 'noopener', text: 'Outlook' })),
-      el('div', { class: 'section-label', text: 'Links' }),
-      el('div', { class: 'actions' }, links.map(([label, u]) => el('a', { class: 'btn', href: u, target: '_blank', rel: 'noopener', text: label }))),
     );
     const scrim = el('div', { class: 'scrim', onclick: closeDrawer });
     $('#layer').append(scrim, d);
