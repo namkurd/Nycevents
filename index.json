@@ -1,0 +1,158 @@
+{
+  "generatedAt": "2026-11-26T19:52:32.646Z",
+  "window": {
+    "from": "2026-11-26",
+    "to": "2026-12-23"
+  },
+  "hiddenByDefault": [
+    "fitness",
+    "brand-popup",
+    "chain-cinema",
+    "library-program"
+  ],
+  "sources": {
+    "fomo": {
+      "ok": true,
+      "count": 41559,
+      "notes": [
+        "fomo export 2026-11-26T02:57:36.950459-05:00",
+        "43521 fomo records in 63 chunks"
+      ],
+      "lastSuccess": "2026-11-26T19:51:32.864Z"
+    },
+    "nycforfree": {
+      "ok": true,
+      "count": 185,
+      "notes": [],
+      "lastSuccess": "2026-11-26T19:51:33.078Z"
+    },
+    "skint": {
+      "ok": true,
+      "count": 104,
+      "notes": [
+        "6 posts; rules read 89/91 entries"
+      ],
+      "lastSuccess": "2026-11-26T19:51:33.444Z"
+    },
+    "fieldnotes": {
+      "ok": false,
+      "count": 0,
+      "error": "GET https://fieldnotesnyc.substack.com/feed -> 403"
+    },
+    "cityhappenings": {
+      "ok": false,
+      "count": 0,
+      "error": "GET https://cityhappenings.substack.com/feed -> 403"
+    },
+    "readingthecity": {
+      "ok": false,
+      "count": 0,
+      "error": "GET https://readingthecity.substack.com/feed -> 403"
+    },
+    "ohmyrockness": {
+      "ok": true,
+      "count": 562,
+      "notes": [
+        "700 shows from 14 pages; 116 recommended"
+      ],
+      "lastSuccess": "2026-11-26T19:51:47.588Z"
+    },
+    "thoughtgallery": {
+      "ok": true,
+      "count": 180,
+      "notes": [],
+      "lastSuccess": "2026-11-26T19:51:50.655Z"
+    },
+    "curated": {
+      "ok": true,
+      "count": 16,
+      "notes": [
+        "7 free-night rules"
+      ],
+      "lastSuccess": "2026-11-26T19:51:50.657Z"
+    },
+    "local": {
+      "ok": true,
+      "count": 17,
+      "notes": [
+        "lunatico 4",
+        "farm-one 12",
+        "kvartira 1"
+      ],
+      "lastSuccess": "2026-11-26T19:52:04.948Z"
+    }
+  },
+  "weeks": [
+    {
+      "week": "2026-W48",
+      "from": "2026-11-23",
+      "to": "2026-11-29",
+      "file": "events-2026-W48.json",
+      "hiddenFile": "events-2026-W48-hidden.json",
+      "events": 3015,
+      "ongoing": 985,
+      "hidden": 1289,
+      "bytes": 1868269
+    },
+    {
+      "week": "2026-W49",
+      "from": "2026-11-30",
+      "to": "2026-12-06",
+      "file": "events-2026-W49.json",
+      "hiddenFile": "events-2026-W49-hidden.json",
+      "events": 6755,
+      "ongoing": 939,
+      "hidden": 3732,
+      "bytes": 3529973
+    },
+    {
+      "week": "2026-W50",
+      "from": "2026-12-07",
+      "to": "2026-12-13",
+      "file": "events-2026-W50.json",
+      "hiddenFile": "events-2026-W50-hidden.json",
+      "events": 6179,
+      "ongoing": 842,
+      "hidden": 3278,
+      "bytes": 3212883
+    },
+    {
+      "week": "2026-W51",
+      "from": "2026-12-14",
+      "to": "2026-12-20",
+      "file": "events-2026-W51.json",
+      "hiddenFile": "events-2026-W51-hidden.json",
+      "events": 4999,
+      "ongoing": 740,
+      "hidden": 3007,
+      "bytes": 2617587
+    },
+    {
+      "week": "2026-W52",
+      "from": "2026-12-21",
+      "to": "2026-12-27",
+      "file": "events-2026-W52.json",
+      "hiddenFile": "events-2026-W52-hidden.json",
+      "events": 1315,
+      "ongoing": 510,
+      "hidden": 1229,
+      "bytes": 876867
+    }
+  ],
+  "lite": "lite.json",
+  "counts": {
+    "collected": 42623,
+    "afterDedupe": 36101,
+    "mergedDuplicates": 6522,
+    "invalidDropped": 0,
+    "picks": 642,
+    "hiddenByDefault": {
+      "fitness": 8626,
+      "brand-popup": 344,
+      "chain-cinema": 433,
+      "library-program": 4179
+    },
+    "transitTier1": 0,
+    "transitTier2": 0
+  }
+}
